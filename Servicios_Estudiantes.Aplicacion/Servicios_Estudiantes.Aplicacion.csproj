@@ -10,15 +10,11 @@
     <PackageReference Include="FluentValidation" Version="12.1.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageReference Include="MediatR" Version="13.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Servicios_Estudiantes.Dominio\Servicios_Estudiantes.Dominio.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="CasosUso\Comandos\__Entidad__\" />
-    <Folder Include="CasosUso\Consultas\__Entidad__\" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,7 @@
-﻿using Servicios_Estudiantes.Aplicacion.Comportamientos;
+﻿using FluentValidation;
+using Servicios_Estudiantes.Aplicacion.Comportamientos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Estudiantes.Comandos;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -16,6 +19,8 @@ namespace Servicios_Estudiantes.Aplicacion.InyeccionDependencias
                 mediatRConfiguracion.AddOpenBehavior(typeof(ValidacionComportamiento<,>));
             });
 
+            servicios.AddValidatorsFromAssemblyContaining<CrearEstudianteCommandValidator>();
+            servicios.AddValidatorsFromAssemblyContaining<CrearProgramaCreditoValidator>();
         }
     }
 }

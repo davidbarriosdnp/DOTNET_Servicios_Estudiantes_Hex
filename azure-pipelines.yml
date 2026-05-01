@@ -1,0 +1,32 @@
+# Azure DevOps: compilación del API Servicios_Estudiantes (.NET 8)
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      - develop
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+
+steps:
+  - task: UseDotNet@2
+    displayName: Use .NET 8 SDK
+    inputs:
+      packageType: sdk
+      version: 8.x
+
+  - script: dotnet restore Servicios_Estudiantes.sln
+    displayName: dotnet restore
+
+  - script: dotnet publish Servicios_Estudiantes.Api/Servicios_Estudiantes.Api.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/publish
+    displayName: dotnet publish API
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish artifact
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)/publish
+      ArtifactName: api

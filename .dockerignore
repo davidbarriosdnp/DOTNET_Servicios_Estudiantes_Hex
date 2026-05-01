@@ -1,0 +1,12 @@
+**/.git
+**/.vs
+**/bin
+**/obj
+**/out
+**/*.user
+**/*.suo
+**/TestResults
+**/.env
+**/node_modules
+**/Database/Scripts/*.bak
+**/_HashTemp

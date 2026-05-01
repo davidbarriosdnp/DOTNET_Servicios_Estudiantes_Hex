@@ -14,6 +14,7 @@ namespace Servicios_Estudiantes.Infraestructura.InyeccionDependencias
                 throw new InvalidOperationException("Falta ConnectionStrings:Estudiantes en configuración.");
 
             servicios.AddSingleton<IRepositorioAcademico>(_ => new RepositorioAcademicoSql(cadena));
+            servicios.AddSingleton<IRepositorioUsuarios>(_ => new RepositorioUsuariosSql(cadena));
             return servicios;
         }
     }

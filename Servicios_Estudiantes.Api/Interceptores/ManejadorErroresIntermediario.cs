@@ -1,4 +1,5 @@
 ﻿using Servicios_Estudiantes.Api.Excepciones;
+using Servicios_Estudiantes.Api.Utilidades;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 using Servicios_Estudiantes.Aplicacion.Excepciones;
 using Servicios_Estudiantes.Dominio.Excepciones;
@@ -83,7 +84,7 @@ namespace Servicios_Estudiantes.Api.Interceptores
                 // ✅ Usa ILogger (integrado con OTEL) — Aparecerá en la pestaña Logs del servicio
                 _logeador.LogError(error, "❌ Mediador de excepción: {Message}", error.Message);
 
-                string resultado = JsonSerializer.Serialize(modeloRespuesta);
+                string resultado = JsonSerializer.Serialize(modeloRespuesta, JsonRespuestaEscritorio.Serializer);
                 await respuesta.WriteAsync(resultado);
             }
         }

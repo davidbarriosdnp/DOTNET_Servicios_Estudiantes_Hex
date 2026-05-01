@@ -1,11 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Servicios_Estudiantes.Api.Configuraciones;
+using Servicios_Estudiantes.Api.Interceptores;
 using Servicios_Estudiantes.Api.Seguridad;
 using Servicios_Estudiantes.Aplicacion.Puertos;
 
@@ -19,8 +18,9 @@ namespace Servicios_Estudiantes.Api.Extensiones
         {
             servicios.Configure<JwtOpciones>(configuracion.GetSection(JwtOpciones.NombreSeccion));
 
-            JwtOpciones jwtInicial = configuracion.GetSection(JwtOpciones.NombreSeccion).Get<JwtOpciones>() ?? new JwtOpciones();
-            jwtInicial.Validar();
+            servicios.AddSingleton<FirmaSymmetricaJwt>();
+            servicios.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfiguracionJwtBearerConFirma>();
+            servicios.AddSingleton<IAuthorizationMiddlewareResultHandler, ManejoAutorizacionRespuestaJson>();
 
             servicios.AddMemoryCache();
             servicios.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>();
@@ -29,35 +29,8 @@ namespace Servicios_Estudiantes.Api.Extensiones
 
             servicios
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(opciones =>
+                .AddJwtBearer(_ =>
                 {
-                    opciones.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtInicial.Emisor,
-                        ValidAudience = jwtInicial.Audiencia,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtInicial.ClaveSecreta)),
-                        ClockSkew = TimeSpan.Zero,
-                        RoleClaimType = ClaimTypes.Role,
-                        NameClaimType = ClaimTypes.Name
-                    };
-
-                    opciones.Events = new JwtBearerEvents
-                    {
-                        OnTokenValidated = async contexto =>
-                        {
-                            string? jti = contexto.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value
-                                ?? contexto.Principal?.FindFirst("jti")?.Value;
-                            if (string.IsNullOrEmpty(jti)) return;
-
-                            IJwtListaNegra lista = contexto.HttpContext.RequestServices.GetRequiredService<IJwtListaNegra>();
-                            if (await lista.EstaRevocadoAsync(jti, contexto.HttpContext.RequestAborted).ConfigureAwait(false))
-                                contexto.Fail("Token de acceso revocado.");
-                        }
-                    };
                 });
 
             servicios.AddAuthorization(opciones =>

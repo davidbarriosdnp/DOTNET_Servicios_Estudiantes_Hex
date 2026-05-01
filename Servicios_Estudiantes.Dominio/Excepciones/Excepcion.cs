@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Servicios_Estudiantes.Dominio.Excepciones
+﻿namespace Servicios_Estudiantes.Dominio.Excepciones
 {
-    public class Excepcion
+    /// <summary>
+    /// Regla de negocio o invariante de dominio incumplida.
+    /// </summary>
+    public sealed class Excepcion : Exception
     {
+        public Excepcion()
+        {
+        }
+
+        public Excepcion(string? message) : base(message)
+        {
+        }
+
+        public Excepcion(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
     }
 }

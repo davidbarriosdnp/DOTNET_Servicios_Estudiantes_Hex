@@ -1,0 +1,9 @@
+﻿namespace Servicios_Estudiantes.Api.Configuraciones
+{
+    public record ApiConfiguracion(
+        string OtelLogsEndpoint,
+        string OtelTracesEndpoint,
+        string OtelHeaders,
+        string NombreServicio,
+        string[] OrigenesCORSPermitidos);
+}

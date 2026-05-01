@@ -15,8 +15,12 @@
             app.UseCors("PoliticaRestrictiva");
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             RouteGroupBuilder apiGroup = app.MapGroup("/api");
+            apiGroup.MapearTodasLasVersionesControlador("Auth");
+            apiGroup.MapearTodasLasVersionesControlador("Usuarios");
             apiGroup.MapearTodasLasVersionesControlador("Estudiantes");
             apiGroup.MapearTodasLasVersionesControlador("ProgramasCredito");
             apiGroup.MapearTodasLasVersionesControlador("Profesores");

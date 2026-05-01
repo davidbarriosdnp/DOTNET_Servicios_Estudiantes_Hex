@@ -15,6 +15,8 @@ constructor.Logging.ConfigurarDynatraceLogs(configuracion);
 constructor.Services.AddCustomCors(configuracion);
 constructor.Services.AddEndpointsApiExplorer();
 constructor.Services.AddSwaggerGen();
+constructor.Services.AgregarSwaggerConJwt();
+constructor.Services.AgregarAutenticacionJwt(constructor.Configuration);
 constructor.Services.AgregarCapaAplicacion();
 constructor.Services.AgregarInfraestructura(constructor.Configuration);
 

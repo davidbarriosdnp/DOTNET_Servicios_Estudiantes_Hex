@@ -1,6 +1,7 @@
 ﻿using Servicios_Estudiantes.Api.Excepciones;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 using Servicios_Estudiantes.Aplicacion.Excepciones;
+using Servicios_Estudiantes.Dominio.Excepciones;
 using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
@@ -46,6 +47,11 @@ namespace Servicios_Estudiantes.Api.Interceptores
                         break;
 
                     case ExcepcionAplicacion e:
+                        respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
+                        modeloRespuesta.Mensaje = e.Message;
+                        break;
+
+                    case Excepcion e:
                         respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
                         modeloRespuesta.Mensaje = e.Message;
                         break;

@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.11" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
@@ -17,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Servicios_Estudiantes.Aplicacion\Servicios_Estudiantes.Aplicacion.csproj" />
+    <ProjectReference Include="..\Servicios_Estudiantes.Dominio\Servicios_Estudiantes.Dominio.csproj" />
     <ProjectReference Include="..\Servicios_Estudiantes.Infraestructura\Servicios_Estudiantes.Infraestructura.csproj" />
   </ItemGroup>
 

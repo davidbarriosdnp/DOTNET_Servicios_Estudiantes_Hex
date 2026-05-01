@@ -10,6 +10,26 @@ API en **.NET 8** para dominio académico (programas, profesores, materias, estu
 | `Servicios_Estudiantes.Aplicacion` | Casos de uso (MediatR), DTOs, puertos, validación |
 | `Servicios_Estudiantes.Dominio` | Entidades y excepciones de dominio |
 | `Servicios_Estudiantes.Infraestructura` | Adaptadores SQL (`RepositorioAcademicoSql`, `RepositorioUsuariosSql`) |
+| `Servicios_Estudiantes.Pruebas` | Pruebas de integración (xUnit + `WebApplicationFactory`) |
+
+## Formato de respuesta unificado
+
+- Los endpoints de negocio devuelven `Respuesta<T>` (camelCase en JSON) vía el middleware de errores o `Results.Ok`.
+- **401** (JWT inválido, ausente o expirado): cuerpo JSON con el mismo envoltorio `operacionExitosa`, `mensaje`, `errores`, `resultado` (evento `OnChallenge` de JwtBearer + `JsonRespuestaEscritorio`).
+- **403** (identidad válida pero sin rol/política): mismo envoltorio (`IAuthorizationMiddlewareResultHandler` personalizado).
+- La **firma HS256** emite y valida con la misma instancia `FirmaSymmetricaJwt` (clave `Jwt:ClaveSecreta`); evita el error *“The signature key was not found”* por desalineación emisor/validador.
+
+## Health checks
+
+- `GET /health` — informe JSON de todas las comprobaciones registradas.
+- `GET /health/live` — solo comprobaciones con etiqueta `live` (liveness).
+- Anónimos; no requieren JWT.
+
+## Pruebas
+
+```bash
+dotnet test Servicios_Estudiantes.Pruebas/Servicios_Estudiantes.Pruebas.csproj
+```
 
 ## Base de datos
 
@@ -76,7 +96,7 @@ El middleware `ManejadorErroresIntermediario` serializa el envoltorio `Respuesta
 |---------|-----|
 | `Dockerfile` | Imagen multi-stage del API (puerto 8080). |
 | `.dockerignore` | Reduce contexto de build Docker. |
-| `azure-pipelines.yml` | Ejemplo de CI en Azure DevOps (restore, build, publish). |
+| `azure-pipelines.yml` | Ejemplo de CI en Azure DevOps (restore, test, publish). |
 | `coverlet.runsettings` | Plantilla para cobertura con Coverlet cuando exista proyecto de pruebas. |
 | `NuGet.config` | Origen de paquetes NuGet.org. |
 

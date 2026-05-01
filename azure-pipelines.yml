@@ -22,6 +22,9 @@ steps:
   - script: dotnet restore Servicios_Estudiantes.sln
     displayName: dotnet restore
 
+  - script: dotnet test Servicios_Estudiantes.Pruebas/Servicios_Estudiantes.Pruebas.csproj -c $(buildConfiguration) --no-restore
+    displayName: dotnet test
+
   - script: dotnet publish Servicios_Estudiantes.Api/Servicios_Estudiantes.Api.csproj -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/publish
     displayName: dotnet publish API
 

@@ -8,6 +8,8 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
     {
         public static RouteGroupBuilder MapProgramasCredito(this RouteGroupBuilder group)
         {
+            group.RequireAuthorization();
+
             group.MapGet("", async (IMediator m, bool soloActivos, CancellationToken ct) =>
                 Results.Ok(await m.Send(new ListarProgramasCreditoQuery(soloActivos), ct)));
 

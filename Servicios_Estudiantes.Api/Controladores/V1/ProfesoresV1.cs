@@ -8,6 +8,8 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
     {
         public static RouteGroupBuilder MapProfesores(this RouteGroupBuilder group)
         {
+            group.RequireAuthorization();
+
             group.MapGet("", async (IMediator m, bool soloActivos, CancellationToken ct) =>
                 Results.Ok(await m.Send(new ListarProfesoresQuery(soloActivos), ct)));
 

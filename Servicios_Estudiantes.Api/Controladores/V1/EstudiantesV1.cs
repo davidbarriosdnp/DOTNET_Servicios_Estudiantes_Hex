@@ -10,6 +10,8 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
     {
         public static RouteGroupBuilder MapEstudiantes(this RouteGroupBuilder group)
         {
+            group.RequireAuthorization();
+
             group.MapGet("catalogo/materias", async (IMediator mediator, int? programaCreditoId, bool soloActivos, CancellationToken cancellationToken) =>
             {
                 Respuesta<IReadOnlyList<MateriaCatalogoDto>> resultado =

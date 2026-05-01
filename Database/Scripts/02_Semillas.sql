@@ -8,11 +8,28 @@ DELETE FROM dbo.Estudiante;
 DELETE FROM dbo.Materia;
 DELETE FROM dbo.Profesor;
 DELETE FROM dbo.ProgramaCredito;
+DELETE FROM dbo.RefreshToken;
+DELETE FROM dbo.Usuario;
 
 SET IDENTITY_INSERT dbo.ProgramaCredito ON;
 INSERT INTO dbo.ProgramaCredito (ProgramaCreditoId, Nombre, CreditosPorMateria, MaxMateriasPorEstudiante, FechaRegistro, FechaModificacion, Estado)
 VALUES (1, N'Programa de créditos académicos', 3, 3, SYSUTCDATETIME(), NULL, 1);
 SET IDENTITY_INSERT dbo.ProgramaCredito OFF;
+GO
+
+SET IDENTITY_INSERT dbo.Usuario ON;
+INSERT INTO dbo.Usuario (UsuarioId, NombreUsuario, Email, PasswordHash, Rol, FechaRegistro, FechaModificacion, Estado)
+VALUES (
+    1,
+    N'admin',
+    N'admin@local.test',
+    N'AQAAAAIAAYagAAAAEBUYADfSZ2TyLmEJjXSQVXyehyd/8I0XdpR0kBnq65pRMiA1G9a+PKzL1uvr6fbcyA==',
+    N'Administrador',
+    SYSUTCDATETIME(),
+    NULL,
+    1
+);
+SET IDENTITY_INSERT dbo.Usuario OFF;
 GO
 
 SET IDENTITY_INSERT dbo.Profesor ON;

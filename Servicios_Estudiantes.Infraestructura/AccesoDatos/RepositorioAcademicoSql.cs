@@ -137,7 +137,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             cmd.Parameters.AddWithValue("@MateriaId", id);
             await using SqlDataReader r = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
             if (!await r.ReadAsync(ct).ConfigureAwait(false)) return null;
-            return new MateriaDetalleDto(r.GetInt32(0), r.GetString(1), r.GetByte(2), r.GetInt32(3), r.GetInt32(4), r.GetDateTime(5), r.IsDBNull(6) ? null : r.GetDateTime(6), r.GetByte(7), r.GetString(8));
+            return LeerMateriaDetalleDto(r);
         }
 
         public async Task<IReadOnlyList<MateriaCatalogoDto>> ListarMateriasPorProgramaAsync(int? programaCreditoId, bool soloActivos, CancellationToken ct)
@@ -150,9 +150,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             cmd.Parameters.AddWithValue("@SoloActivos", soloActivos);
             await using SqlDataReader r = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
             while (await r.ReadAsync(ct).ConfigureAwait(false))
-            {
-                list.Add(new MateriaCatalogoDto(r.GetInt32(0), r.GetString(1), r.GetByte(2), r.GetInt32(3), r.GetInt32(4), r.GetString(5), r.GetDateTime(6), r.IsDBNull(7) ? null : r.GetDateTime(7), r.GetByte(8)));
-            }
+                list.Add(LeerMateriaCatalogoDto(r));
 
             return list;
         }
@@ -275,6 +273,37 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
                 return nombres;
             }
             catch (SqlException ex) { LanzarSiNegocio(ex); throw; }
+        }
+
+        /// <summary>
+        /// Columnas alineadas con <c>dbo.sp_Materia_ObtenerPorId</c> / <c>dbo.sp_Materia_ListarPorPrograma</c>:
+        /// 0 MateriaId, 1 Nombre, 2 Creditos, 3 ProfesorId, 4 ProgramaCreditoId, 5 FechaRegistro, 6 FechaModificacion, 7 Estado, 8 NombreProfesor.
+        /// </summary>
+        private static MateriaDetalleDto LeerMateriaDetalleDto(SqlDataReader r) =>
+            new(
+                r.GetInt32(0),
+                r.GetString(1),
+                r.GetByte(2),
+                r.GetInt32(3),
+                r.GetInt32(4),
+                r.GetDateTime(5),
+                r.IsDBNull(6) ? null : r.GetDateTime(6),
+                r.GetByte(7),
+                r.GetString(8));
+
+        private static MateriaCatalogoDto LeerMateriaCatalogoDto(SqlDataReader r)
+        {
+            MateriaDetalleDto detalle = LeerMateriaDetalleDto(r);
+            return new MateriaCatalogoDto(
+                detalle.MateriaId,
+                detalle.Nombre,
+                detalle.Creditos,
+                detalle.ProfesorId,
+                detalle.ProgramaCreditoId,
+                detalle.NombreProfesor,
+                detalle.FechaRegistro,
+                detalle.FechaModificacion,
+                detalle.Estado);
         }
 
         private static ProgramaCreditoDto LeerPrograma(SqlDataReader r) =>

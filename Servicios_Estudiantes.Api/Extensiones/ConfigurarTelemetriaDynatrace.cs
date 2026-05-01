@@ -11,12 +11,13 @@ namespace Servicios_Estudiantes.Api.Extensiones
 
         public static ILoggingBuilder ConfigurarDynatraceLogs(this ILoggingBuilder logging, ApiConfiguracion config)
         {
-
             logging.ClearProviders();
             logging.AddConsole();
             logging.SetMinimumLevel(LogLevel.Information);
-            logging.ClearProviders();
-            logging.AddConsole();
+
+            if (string.IsNullOrWhiteSpace(config.OtelLogsEndpoint))
+                return logging;
+
             logging.AddFilter<OpenTelemetryLoggerProvider>("*", LogLevel.Information);
             logging.AddOpenTelemetry(logConfig =>
             {
@@ -29,8 +30,8 @@ namespace Servicios_Estudiantes.Api.Extensiones
                 logConfig.ParseStateValues = true;
                 logConfig.AddOtlpExporter(options =>
                 {
-                    options.Endpoint = new Uri(config.OtelLogsEndpoint!);
-                    options.Headers = $"Authorization=Api-Token {config.OtelHeaders!}";
+                    options.Endpoint = new Uri(config.OtelLogsEndpoint);
+                    options.Headers = $"Authorization=Api-Token {config.OtelHeaders}";
                     options.Protocol = OtlpExportProtocol.HttpProtobuf;
                 });
             });
@@ -40,6 +41,9 @@ namespace Servicios_Estudiantes.Api.Extensiones
 
         public static IServiceCollection ConfigureDynatraceTrazas(this IServiceCollection services, ApiConfiguracion config)
         {
+            if (string.IsNullOrWhiteSpace(config.OtelTracesEndpoint))
+                return services;
+
             services.AddOpenTelemetry()
                 .WithTracing(tp =>
                 {
@@ -51,8 +55,8 @@ namespace Servicios_Estudiantes.Api.Extensiones
                       .AddHttpClientInstrumentation()
                       .AddOtlpExporter(o =>
                       {
-                          o.Endpoint = new Uri(config.OtelTracesEndpoint!);
-                          o.Headers = $"Authorization=Api-Token {config.OtelHeaders!}";
+                          o.Endpoint = new Uri(config.OtelTracesEndpoint);
+                          o.Headers = $"Authorization=Api-Token {config.OtelHeaders}";
                           o.Protocol = OtlpExportProtocol.HttpProtobuf;
                       });
                 });

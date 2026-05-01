@@ -27,7 +27,7 @@ namespace Servicios_Estudiantes.Api.Interceptores
                 ["dt.trace_id"] = actividad?.TraceId.ToString(),
                 ["dt.span_id"] = actividad?.SpanId.ToString(),
                 ["dt.entity.process_group_instance"] = "",
-                ["service.name"] = "Plantilla"
+                ["service.name"] = "Servicios_Estudiantes"
             };
 
             using (_logeador.BeginScope(itemsContexto))

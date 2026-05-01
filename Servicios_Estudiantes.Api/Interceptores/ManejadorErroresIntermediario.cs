@@ -45,6 +45,11 @@ namespace Servicios_Estudiantes.Api.Interceptores
                         modeloRespuesta.Errores = e.Errores;
                         break;
 
+                    case ExcepcionAplicacion e:
+                        respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
+                        modeloRespuesta.Mensaje = e.Message;
+                        break;
+
                     case KeyNotFoundException e:
                         respuesta.StatusCode = (int)HttpStatusCode.NotFound;
                         break;

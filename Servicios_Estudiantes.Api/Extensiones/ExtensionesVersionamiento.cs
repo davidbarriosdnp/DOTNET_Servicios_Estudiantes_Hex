@@ -71,10 +71,7 @@ namespace Servicios_Estudiantes.Api.Extensiones
                             $"El método {candidato.Metodo.DeclaringType!.FullName}.{candidato.Metodo.Name} devolvió null.");
                     }
 
-                    resultado
-                        .WithTags($"{nombreControlador} V{version}")
-                        .WithMetadata(new EndpointNameMetadata($"{nombreControlador}V{version}"));
-
+                    resultado.WithTags($"{nombreControlador} V{version}");
                 }
                 else
                 {

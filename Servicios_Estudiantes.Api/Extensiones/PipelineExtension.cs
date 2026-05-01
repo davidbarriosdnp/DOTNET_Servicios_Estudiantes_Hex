@@ -17,7 +17,10 @@
             app.UseRouting();
 
             RouteGroupBuilder apiGroup = app.MapGroup("/api");
-            apiGroup.MapearTodasLasVersionesControlador("Plantilla");
+            apiGroup.MapearTodasLasVersionesControlador("Estudiantes");
+            apiGroup.MapearTodasLasVersionesControlador("ProgramasCredito");
+            apiGroup.MapearTodasLasVersionesControlador("Profesores");
+            apiGroup.MapearTodasLasVersionesControlador("Materias");
             return app;
         }
     }

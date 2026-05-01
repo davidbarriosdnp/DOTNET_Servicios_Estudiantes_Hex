@@ -8,8 +8,14 @@ using Servicios_Estudiantes.Aplicacion.Utilidades;
 
 namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
 {
+    /// <summary>
+    /// Solicitud para iniciar sesión con nombre de usuario y contraseña.
+    /// </summary>
     public sealed record IniciarSesionCommand(string NombreUsuario, string Password) : IRequest<Respuesta<TokenParDto>>;
 
+    /// <summary>
+    /// Manejador de la solicitud de inicio de sesión.
+    /// </summary>
     public sealed class IniciarSesionCommandHandler(
         IRepositorioUsuarios repositorio,
         IPasswordHasher<string> passwordHasher,
@@ -20,6 +26,9 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
         private readonly IPasswordHasher<string> _passwordHasher = passwordHasher;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
 
+        /// <summary>
+        /// Maneja la solicitud, valida credenciales y emite tokens si corresponde.
+        /// </summary>
         public async Task<Respuesta<TokenParDto>> Handle(IniciarSesionCommand solicitud, CancellationToken cancellationToken)
         {
             UsuarioCredencialDto? usuario = await _repositorio
@@ -52,6 +61,9 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
         }
     }
 
+    /// <summary>
+    /// Validador para la solicitud de inicio de sesión.
+    /// </summary>
     public sealed class IniciarSesionCommandValidator : AbstractValidator<IniciarSesionCommand>
     {
         public IniciarSesionCommandValidator()

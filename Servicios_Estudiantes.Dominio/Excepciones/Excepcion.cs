@@ -1,7 +1,7 @@
 ﻿namespace Servicios_Estudiantes.Dominio.Excepciones
 {
     /// <summary>
-    /// Regla de negocio o invariante de dominio incumplida.
+    /// Excepción que representa una regla de negocio o invariante de dominio incumplida.
     /// </summary>
     public sealed class Excepcion : Exception
     {

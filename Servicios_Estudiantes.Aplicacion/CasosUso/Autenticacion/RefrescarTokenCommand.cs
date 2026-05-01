@@ -7,14 +7,23 @@ using Servicios_Estudiantes.Aplicacion.Utilidades;
 
 namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
 {
+    /// <summary>
+    /// Solicitud para refrescar tokens a partir de un refresh token plano.
+    /// </summary>
     public sealed record RefrescarTokenCommand(string TokenRenovacion) : IRequest<Respuesta<TokenParDto>>;
 
+    /// <summary>
+    /// Manejador para refrescar tokens.
+    /// </summary>
     public sealed class RefrescarTokenCommandHandler(IRepositorioUsuarios repositorio, IGeneradorTokensJwt generadorTokens)
         : IRequestHandler<RefrescarTokenCommand, Respuesta<TokenParDto>>
     {
         private readonly IRepositorioUsuarios _repositorio = repositorio;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
 
+        /// <summary>
+        /// Maneja la solicitud de refresco de token, valida el refresh y emite un nuevo par de tokens.
+        /// </summary>
         public async Task<Respuesta<TokenParDto>> Handle(RefrescarTokenCommand solicitud, CancellationToken cancellationToken)
         {
             string hash = HashTokenRenovacion.AHexMinuscula(solicitud.TokenRenovacion);
@@ -39,6 +48,9 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
         }
     }
 
+    /// <summary>
+    /// Validador para la solicitud de refresco de token.
+    /// </summary>
     public sealed class RefrescarTokenCommandValidator : AbstractValidator<RefrescarTokenCommand>
     {
         public RefrescarTokenCommandValidator()

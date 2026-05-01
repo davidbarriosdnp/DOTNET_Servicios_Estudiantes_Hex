@@ -2,6 +2,7 @@
 {
     /// <summary>
     /// Envoltorio estándar de respuesta con soporte de conversión implícita desde T.
+    /// Contiene helpers para crear respuestas de éxito o error.
     /// </summary>
     public class Respuesta<T>
     {

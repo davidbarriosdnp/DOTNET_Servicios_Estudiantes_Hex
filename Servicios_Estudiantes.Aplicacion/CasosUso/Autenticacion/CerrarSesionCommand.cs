@@ -11,12 +11,18 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
     /// </summary>
     public sealed record CerrarSesionCommand(string? EncabezadoAutorizacionBearer, string? TokenRenovacionOpcional) : IRequest<Respuesta<bool>>;
 
+    /// <summary>
+    /// Manejador para cerrar sesión: revoca el access token por jti y el refresh si se proporciona.
+    /// </summary>
     public sealed class CerrarSesionCommandHandler(IRepositorioUsuarios repositorio, IJwtListaNegra listaNegra)
         : IRequestHandler<CerrarSesionCommand, Respuesta<bool>>
     {
         private readonly IRepositorioUsuarios _repositorio = repositorio;
         private readonly IJwtListaNegra _listaNegra = listaNegra;
 
+        /// <summary>
+        /// Maneja la revocación de tokens según la solicitud.
+        /// </summary>
         public async Task<Respuesta<bool>> Handle(CerrarSesionCommand solicitud, CancellationToken cancellationToken)
         {
             if (!string.IsNullOrWhiteSpace(solicitud.EncabezadoAutorizacionBearer))
@@ -48,6 +54,9 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
             return Respuesta<bool>.Ok(true, "Sesión cerrada.");
         }
 
+        /// <summary>
+        /// Extrae el token sin el prefijo Bearer del encabezado Authorization.
+        /// </summary>
         private static string? ExtraerBearer(string? header)
         {
             if (string.IsNullOrWhiteSpace(header)) return null;

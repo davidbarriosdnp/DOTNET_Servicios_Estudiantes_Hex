@@ -7,6 +7,9 @@ namespace Servicios_Estudiantes.Infraestructura.InyeccionDependencias
 {
     public static class InyeccionDependencia
     {
+        /// <summary>
+        /// Agrega los servicios de infraestructura al contenedor de dependencias.
+        /// </summary>
         public static IServiceCollection AgregarInfraestructura(this IServiceCollection servicios, IConfiguration configuracion)
         {
             string? cadena = configuracion.GetConnectionString("Estudiantes");

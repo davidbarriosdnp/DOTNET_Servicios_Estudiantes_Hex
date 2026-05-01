@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Servicios_Estudiantes.Aplicacion\Servicios_Estudiantes.Aplicacion.csproj" />
     <ProjectReference Include="..\Servicios_Estudiantes.Dominio\Servicios_Estudiantes.Dominio.csproj" />
   </ItemGroup>

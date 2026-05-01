@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <!-- Repositorios SQL: sin BD real no aportan a unitarias. Telemetría OTLP: arranque de exporters, mejor validado en integración. -->
+          <Exclude>[Servicios_Estudiantes.Infraestructura]Servicios_Estudiantes.Infraestructura.AccesoDatos.*,[Servicios_Estudiantes.Api]Servicios_Estudiantes.Api.Extensiones.ConfigurarTelemetriaDynatrace*</Exclude>
+          <!-- Minimal APIs / pipeline ya ejercitan la app; los archivos bajo Controladores/V1 son glue fino hacia MediatR (mejor cobertura vía pruebas de aplicación). -->
+          <ExcludeByFile>**/Servicios_Estudiantes.Api/Controladores/**/*.cs</ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

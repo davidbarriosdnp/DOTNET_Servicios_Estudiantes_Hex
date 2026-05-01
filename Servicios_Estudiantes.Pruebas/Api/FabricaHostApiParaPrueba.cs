@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 
-namespace Servicios_Estudiantes.Pruebas;
+namespace Servicios_Estudiantes.Pruebas.Api;
 
 internal sealed class FabricaHostApiParaPrueba : WebApplicationFactory<Program>
 {

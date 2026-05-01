@@ -34,4 +34,8 @@
     <Folder Include="ConfigDevOps\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Servicios_Estudiantes.Pruebas" />
+  </ItemGroup>
+
 </Project>

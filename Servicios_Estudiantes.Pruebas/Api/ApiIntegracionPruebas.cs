@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace Servicios_Estudiantes.Pruebas;
+namespace Servicios_Estudiantes.Pruebas.Api;
 
 public sealed class ApiIntegracionPruebas
 {

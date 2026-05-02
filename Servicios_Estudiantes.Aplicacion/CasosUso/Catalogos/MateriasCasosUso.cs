@@ -17,7 +17,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos
         public CrearMateriaValidator()
         {
             RuleFor(x => x.Nombre).NotEmpty().MaximumLength(120);
-            RuleFor(x => x.Creditos).GreaterThan((byte)0);
+            RuleFor(x => x.Creditos).Equal((byte)3).WithMessage("Cada materia debe valer exactamente 3 créditos.");
             RuleFor(x => x.ProfesorId).GreaterThan(0);
             RuleFor(x => x.ProgramaCreditoId).GreaterThan(0);
         }
@@ -38,6 +38,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos
         {
             RuleFor(x => x.MateriaId).GreaterThan(0);
             RuleFor(x => x.Nombre).NotEmpty().MaximumLength(120);
+            RuleFor(x => x.Creditos).Equal((byte)3).WithMessage("Cada materia debe valer exactamente 3 créditos.");
             RuleFor(x => x.Estado).InclusiveBetween((byte)0, (byte)1);
         }
     }

@@ -34,7 +34,19 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
         /// <summary>
         /// Inserta un estudiante y devuelve su id.
         /// </summary>
-        Task<int> InsertarEstudianteAsync(string nombre, string email, int? programaCreditoId, CancellationToken ct);
+        Task<int> InsertarEstudianteAsync(string nombre, string email, int? programaCreditoId, int? usuarioId, CancellationToken ct);
+
+        /// <summary>Registro público: crea usuario (rol Estudiante) y estudiante en una transacción.</summary>
+        Task<(int UsuarioId, int EstudianteId)> RegistroPublicoEstudianteAsync(
+            string nombreUsuario,
+            string email,
+            string passwordHash,
+            string nombreCompleto,
+            int programaCreditoId,
+            CancellationToken ct);
+
+        /// <summary>Devuelve el id de estudiante activo vinculado al usuario, o null.</summary>
+        Task<int?> ObtenerEstudianteIdPorUsuarioAsync(int usuarioId, CancellationToken ct);
         Task ActualizarEstudianteAsync(int id, string nombre, string email, int? programaCreditoId, byte? estado, CancellationToken ct);
         Task EliminarEstudianteAsync(int id, CancellationToken ct);
         Task<EstudianteDetalleDto?> ObtenerEstudiantePorIdAsync(int id, CancellationToken ct);

@@ -8,6 +8,7 @@ DROP PROCEDURE IF EXISTS dbo.sp_Materia_Insertar, dbo.sp_Materia_Actualizar, dbo
 DROP PROCEDURE IF EXISTS dbo.sp_Estudiante_Insertar, dbo.sp_Estudiante_Actualizar, dbo.sp_Estudiante_Eliminar, dbo.sp_Estudiante_ObtenerPorId, dbo.sp_Estudiante_ListarRegistros;
 DROP PROCEDURE IF EXISTS dbo.sp_Inscripcion_Registrar, dbo.sp_Inscripcion_InsertarFila, dbo.sp_Inscripcion_EliminarFila, dbo.sp_Inscripcion_ActualizarMateria, dbo.sp_Inscripcion_ObtenerPorEstudiante;
 DROP PROCEDURE IF EXISTS dbo.sp_Companeros_ListarNombresPorMateria;
+DROP PROCEDURE IF EXISTS dbo.sp_Estudiante_RegistroPublico, dbo.sp_Estudiante_ObtenerIdPorUsuario;
 GO
 
 IF OBJECT_ID(N'dbo.fn_ProgramaCreditoIdPorDefecto', N'FN') IS NOT NULL DROP FUNCTION dbo.fn_ProgramaCreditoIdPorDefecto;
@@ -157,10 +158,14 @@ CREATE PROCEDURE dbo.sp_Materia_Insertar
 AS
 BEGIN
     SET NOCOUNT ON;
+    IF @Creditos <> 3
+        THROW 50125, N'Cada materia debe valer exactamente 3 créditos.', 1;
     IF NOT EXISTS (SELECT 1 FROM dbo.Profesor WHERE ProfesorId = @ProfesorId AND Estado = 1)
         THROW 50120, N'Profesor no válido o inactivo.', 1;
     IF NOT EXISTS (SELECT 1 FROM dbo.ProgramaCredito WHERE ProgramaCreditoId = @ProgramaCreditoId AND Estado = 1)
         THROW 50121, N'Programa no válido o inactivo.', 1;
+    IF (SELECT COUNT(*) FROM dbo.Materia WHERE ProfesorId = @ProfesorId AND ProgramaCreditoId = @ProgramaCreditoId AND Estado = 1) >= 2
+        THROW 50126, N'Cada profesor puede dictar como máximo 2 materias por programa.', 1;
     INSERT INTO dbo.Materia (Nombre, Creditos, ProfesorId, ProgramaCreditoId) VALUES (@Nombre, @Creditos, @ProfesorId, @ProgramaCreditoId);
     SET @MateriaId = SCOPE_IDENTITY();
 END;
@@ -178,6 +183,11 @@ BEGIN
     SET NOCOUNT ON;
     IF NOT EXISTS (SELECT 1 FROM dbo.Materia WHERE MateriaId = @MateriaId)
         THROW 50122, N'Materia no encontrada.', 1;
+    IF @Creditos <> 3
+        THROW 50125, N'Cada materia debe valer exactamente 3 créditos.', 1;
+    IF (SELECT COUNT(*) FROM dbo.Materia
+        WHERE ProfesorId = @ProfesorId AND ProgramaCreditoId = @ProgramaCreditoId AND Estado = 1 AND MateriaId <> @MateriaId) >= 2
+        THROW 50126, N'Cada profesor puede dictar como máximo 2 materias por programa.', 1;
     UPDATE dbo.Materia
     SET Nombre = @Nombre, Creditos = @Creditos, ProfesorId = @ProfesorId, ProgramaCreditoId = @ProgramaCreditoId,
         Estado = @Estado, FechaModificacion = SYSUTCDATETIME()
@@ -228,6 +238,7 @@ CREATE PROCEDURE dbo.sp_Estudiante_Insertar
     @Nombre NVARCHAR(120),
     @Email NVARCHAR(256),
     @ProgramaCreditoId INT = NULL,
+    @UsuarioId INT = NULL,
     @EstudianteId INT OUTPUT
 AS
 BEGIN
@@ -235,7 +246,10 @@ BEGIN
     IF @ProgramaCreditoId IS NULL SET @ProgramaCreditoId = dbo.fn_ProgramaCreditoIdPorDefecto();
     IF NOT EXISTS (SELECT 1 FROM dbo.ProgramaCredito WHERE ProgramaCreditoId = @ProgramaCreditoId AND Estado = 1)
         THROW 50001, N'El programa de créditos no existe o está inactivo.', 1;
-    INSERT INTO dbo.Estudiante (Nombre, Email, ProgramaCreditoId) VALUES (@Nombre, LOWER(LTRIM(RTRIM(@Email))), @ProgramaCreditoId);
+    IF @UsuarioId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.Usuario WHERE UsuarioId = @UsuarioId AND Estado = 1)
+        THROW 50004, N'Usuario no válido o inactivo.', 1;
+    INSERT INTO dbo.Estudiante (Nombre, Email, ProgramaCreditoId, UsuarioId)
+    VALUES (@Nombre, LOWER(LTRIM(RTRIM(@Email))), @ProgramaCreditoId, @UsuarioId);
     SET @EstudianteId = SCOPE_IDENTITY();
 END;
 GO
@@ -277,8 +291,47 @@ CREATE PROCEDURE dbo.sp_Estudiante_ObtenerPorId
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT EstudianteId, Nombre, Email, ProgramaCreditoId, FechaRegistro, FechaModificacion, Estado
+    SELECT EstudianteId, Nombre, Email, ProgramaCreditoId, FechaRegistro, FechaModificacion, Estado, UsuarioId
     FROM dbo.Estudiante WHERE EstudianteId = @EstudianteId;
+END;
+GO
+
+CREATE PROCEDURE dbo.sp_Estudiante_ObtenerIdPorUsuario
+    @UsuarioId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT EstudianteId FROM dbo.Estudiante WHERE UsuarioId = @UsuarioId AND Estado = 1;
+END;
+GO
+
+CREATE PROCEDURE dbo.sp_Estudiante_RegistroPublico
+    @NombreUsuario NVARCHAR(120),
+    @Email NVARCHAR(256),
+    @PasswordHash NVARCHAR(500),
+    @NombreCompleto NVARCHAR(120),
+    @ProgramaCreditoId INT,
+    @UsuarioId INT OUTPUT,
+    @EstudianteId INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    DECLARE @EmailNorm NVARCHAR(256) = LOWER(LTRIM(RTRIM(@Email)));
+    IF EXISTS (SELECT 1 FROM dbo.Usuario WHERE Email = @EmailNorm OR NombreUsuario = @NombreUsuario)
+        THROW 50300, N'El correo o nombre de usuario ya está registrado.', 1;
+    IF EXISTS (SELECT 1 FROM dbo.Estudiante WHERE Email = @EmailNorm)
+        THROW 50301, N'El correo ya está registrado como estudiante.', 1;
+    IF NOT EXISTS (SELECT 1 FROM dbo.ProgramaCredito WHERE ProgramaCreditoId = @ProgramaCreditoId AND Estado = 1)
+        THROW 50302, N'Programa de créditos no válido o inactivo.', 1;
+    BEGIN TRANSACTION;
+    INSERT INTO dbo.Usuario (NombreUsuario, Email, PasswordHash, Rol)
+    VALUES (@NombreUsuario, @EmailNorm, @PasswordHash, N'Estudiante');
+    SET @UsuarioId = CAST(SCOPE_IDENTITY() AS INT);
+    INSERT INTO dbo.Estudiante (Nombre, Email, ProgramaCreditoId, UsuarioId)
+    VALUES (@NombreCompleto, @EmailNorm, @ProgramaCreditoId, @UsuarioId);
+    SET @EstudianteId = CAST(SCOPE_IDENTITY() AS INT);
+    COMMIT TRANSACTION;
 END;
 GO
 

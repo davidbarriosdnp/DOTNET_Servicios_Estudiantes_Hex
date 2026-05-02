@@ -90,23 +90,23 @@ public sealed class CasosUsoCatalogosPruebas
     public async Task Materia_CicloCrudYConsultas()
     {
         Mock<IRepositorioAcademico> repo = new();
-        repo.Setup(r => r.InsertarMateriaAsync("Mat", 4, 2, 3, It.IsAny<CancellationToken>())).ReturnsAsync(8);
+        repo.Setup(r => r.InsertarMateriaAsync("Mat", 3, 2, 3, It.IsAny<CancellationToken>())).ReturnsAsync(8);
 
         CrearMateriaHandler crear = new(repo.Object);
-        Assert.Equal(8, (await crear.Handle(new CrearMateriaCommand("Mat", 4, 2, 3), CancellationToken.None)).Resultado);
+        Assert.Equal(8, (await crear.Handle(new CrearMateriaCommand("Mat", 3, 2, 3), CancellationToken.None)).Resultado);
 
         ActualizarMateriaHandler act = new(repo.Object);
-        await act.Handle(new ActualizarMateriaCommand(8, "Mat2", 4, 2, 3, 1), CancellationToken.None);
+        await act.Handle(new ActualizarMateriaCommand(8, "Mat2", 3, 2, 3, 1), CancellationToken.None);
 
         EliminarMateriaHandler elim = new(repo.Object);
         await elim.Handle(new EliminarMateriaCommand(8), CancellationToken.None);
 
-        MateriaDetalleDto det = new(8, "Mat", 4, 2, 3, FechaBase, null, 1, "Prof");
+        MateriaDetalleDto det = new(8, "Mat", 3, 2, 3, FechaBase, null, 1, "Prof");
         repo.Setup(r => r.ObtenerMateriaPorIdAsync(8, It.IsAny<CancellationToken>())).ReturnsAsync(det);
         ObtenerMateriaHandler obt = new(repo.Object);
         Assert.Equal("Mat", (await obt.Handle(new ObtenerMateriaPorIdQuery(8), CancellationToken.None)).Resultado!.Nombre);
 
-        MateriaCatalogoDto cat = new(8, "Mat", 4, 2, 3, "Prof", FechaBase, null, 1);
+        MateriaCatalogoDto cat = new(8, "Mat", 3, 2, 3, "Prof", FechaBase, null, 1);
         repo.Setup(r => r.ListarMateriasPorProgramaAsync(3, true, It.IsAny<CancellationToken>())).ReturnsAsync([cat]);
         ListarMateriasPorProgramaHandler list = new(repo.Object);
         Assert.Single((await list.Handle(new ListarMateriasPorProgramaQuery(3, true), CancellationToken.None)).Resultado!);
@@ -130,9 +130,11 @@ public sealed class CasosUsoCatalogosPruebas
     }
 
     [Fact]
-    public void CrearMateriaValidator_RechazaCreditosCero()
+    public void CrearMateriaValidator_RechazaCreditosDistintosDeTres()
     {
         CrearMateriaValidator v = new();
         Assert.False(v.Validate(new CrearMateriaCommand("x", 0, 1, 1)).IsValid);
+        Assert.False(v.Validate(new CrearMateriaCommand("x", 4, 1, 1)).IsValid);
+        Assert.True(v.Validate(new CrearMateriaCommand("x", 3, 1, 1)).IsValid);
     }
 }

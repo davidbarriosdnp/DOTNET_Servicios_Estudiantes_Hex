@@ -60,7 +60,8 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         int ProgramaCreditoId,
         DateTime FechaRegistro,
         DateTime? FechaModificacion,
-        byte Estado);
+        byte Estado,
+        int? UsuarioId);
 
     /// <summary>
     /// DTO usado en listados de estudiantes con materias inscritas.

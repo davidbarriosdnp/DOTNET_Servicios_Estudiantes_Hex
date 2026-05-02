@@ -4,7 +4,7 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
 
     public interface IGeneradorTokensJwt
     {
-        ResultadoEmisionTokenAcceso CrearTokenAcceso(int usuarioId, string nombreUsuario, string rol);
+        ResultadoEmisionTokenAcceso CrearTokenAcceso(int usuarioId, string nombreUsuario, string rol, int? estudianteId = null);
 
         string CrearTokenRenovacion();
 

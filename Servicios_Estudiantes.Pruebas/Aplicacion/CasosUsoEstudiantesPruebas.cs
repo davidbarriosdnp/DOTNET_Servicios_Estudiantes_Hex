@@ -15,7 +15,7 @@ public sealed class CasosUsoEstudiantesPruebas
     public async Task CrearEstudiante_DelegaYDevuelveId()
     {
         Mock<IRepositorioAcademico> repo = new();
-        repo.Setup(r => r.InsertarEstudianteAsync("N", "n@test.dev", 3, It.IsAny<CancellationToken>())).ReturnsAsync(42);
+        repo.Setup(r => r.InsertarEstudianteAsync("N", "n@test.dev", 3, null, It.IsAny<CancellationToken>())).ReturnsAsync(42);
 
         CrearEstudianteCommandHandler sut = new(repo.Object);
         Respuesta<int> resp = await sut.Handle(new CrearEstudianteCommand("N", "n@test.dev", 3), CancellationToken.None);
@@ -57,7 +57,7 @@ public sealed class CasosUsoEstudiantesPruebas
     [Fact]
     public async Task ObtenerEstudiantePorId_Encontrado_DevuelveOk()
     {
-        EstudianteDetalleDto dto = new(1, "x", "x@test.dev", 1, FechaBase, null, 1);
+        EstudianteDetalleDto dto = new(1, "x", "x@test.dev", 1, FechaBase, null, 1, null);
         Mock<IRepositorioAcademico> repo = new();
         repo.Setup(r => r.ObtenerEstudiantePorIdAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(dto);
 

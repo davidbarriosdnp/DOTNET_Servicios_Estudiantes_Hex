@@ -211,14 +211,55 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         /// <summary>
         /// Inserta un estudiante y devuelve su id.
         /// </summary>
-        public async Task<int> InsertarEstudianteAsync(string nombre, string email, int? programaCreditoId, CancellationToken ct)
+        public async Task<int> InsertarEstudianteAsync(string nombre, string email, int? programaCreditoId, int? usuarioId, CancellationToken ct)
         {
             try
             {
                 return await EjecutarConSalidaIntAsync(ct, "dbo.sp_Estudiante_Insertar", "@EstudianteId",
-                    ("@Nombre", nombre), ("@Email", email), ("@ProgramaCreditoId", programaCreditoId ?? (object)DBNull.Value)).ConfigureAwait(false);
+                    ("@Nombre", nombre), ("@Email", email), ("@ProgramaCreditoId", programaCreditoId ?? (object)DBNull.Value),
+                    ("@UsuarioId", usuarioId ?? (object)DBNull.Value)).ConfigureAwait(false);
             }
             catch (SqlException ex) { LanzarSiNegocio(ex); throw; }
+        }
+
+        /// <inheritdoc />
+        public async Task<(int UsuarioId, int EstudianteId)> RegistroPublicoEstudianteAsync(
+            string nombreUsuario,
+            string email,
+            string passwordHash,
+            string nombreCompleto,
+            int programaCreditoId,
+            CancellationToken ct)
+        {
+            try
+            {
+                await using SqlConnection cn = new(_cs);
+                await cn.OpenAsync(ct).ConfigureAwait(false);
+                await using SqlCommand cmd = new("dbo.sp_Estudiante_RegistroPublico", cn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@NombreUsuario", nombreUsuario);
+                cmd.Parameters.AddWithValue("@Email", email);
+                cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                cmd.Parameters.AddWithValue("@NombreCompleto", nombreCompleto);
+                cmd.Parameters.AddWithValue("@ProgramaCreditoId", programaCreditoId);
+                SqlParameter pUsuario = new("@UsuarioId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                SqlParameter pEst = new("@EstudianteId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                cmd.Parameters.Add(pUsuario);
+                cmd.Parameters.Add(pEst);
+                await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
+                return ((int)pUsuario.Value!, (int)pEst.Value!);
+            }
+            catch (SqlException ex) { LanzarSiNegocio(ex); throw; }
+        }
+
+        /// <inheritdoc />
+        public async Task<int?> ObtenerEstudianteIdPorUsuarioAsync(int usuarioId, CancellationToken ct)
+        {
+            await using SqlConnection cn = new(_cs);
+            await cn.OpenAsync(ct).ConfigureAwait(false);
+            await using SqlCommand cmd = new("dbo.sp_Estudiante_ObtenerIdPorUsuario", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@UsuarioId", usuarioId);
+            object? escalar = await cmd.ExecuteScalarAsync(ct).ConfigureAwait(false);
+            return escalar is null or DBNull ? null : Convert.ToInt32(escalar, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -255,7 +296,15 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             cmd.Parameters.AddWithValue("@EstudianteId", id);
             await using SqlDataReader r = await cmd.ExecuteReaderAsync(ct).ConfigureAwait(false);
             if (!await r.ReadAsync(ct).ConfigureAwait(false)) return null;
-            return new EstudianteDetalleDto(r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetInt32(3), r.GetDateTime(4), r.IsDBNull(5) ? null : r.GetDateTime(5), r.GetByte(6));
+            return new EstudianteDetalleDto(
+                r.GetInt32(0),
+                r.GetString(1),
+                r.GetString(2),
+                r.GetInt32(3),
+                r.GetDateTime(4),
+                r.IsDBNull(5) ? null : r.GetDateTime(5),
+                r.GetByte(6),
+                r.IsDBNull(7) ? null : r.GetInt32(7));
         }
 
         /// <summary>

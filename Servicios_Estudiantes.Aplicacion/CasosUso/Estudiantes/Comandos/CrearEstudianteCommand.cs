@@ -18,6 +18,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Estudiantes.Comandos
                 solicitud.Nombre,
                 solicitud.Email,
                 solicitud.ProgramaCreditoId,
+                usuarioId: null,
                 cancellationToken).ConfigureAwait(false);
 
             return Respuesta<int>.Ok(id, "Registro creado.");

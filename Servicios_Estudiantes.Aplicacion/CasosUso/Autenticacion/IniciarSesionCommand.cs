@@ -18,11 +18,13 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
     /// </summary>
     public sealed class IniciarSesionCommandHandler(
         IRepositorioUsuarios repositorio,
+        IRepositorioAcademico repositorioAcademico,
         IPasswordHasher<string> passwordHasher,
         IGeneradorTokensJwt generadorTokens)
         : IRequestHandler<IniciarSesionCommand, Respuesta<TokenParDto>>
     {
         private readonly IRepositorioUsuarios _repositorio = repositorio;
+        private readonly IRepositorioAcademico _repositorioAcademico = repositorioAcademico;
         private readonly IPasswordHasher<string> _passwordHasher = passwordHasher;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
 
@@ -48,7 +50,11 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
                 await _repositorio.ActualizarPasswordAsync(usuario.UsuarioId, nuevoHash, cancellationToken).ConfigureAwait(false);
             }
 
-            ResultadoEmisionTokenAcceso acceso = _generadorTokens.CrearTokenAcceso(usuario.UsuarioId, usuario.NombreUsuario, usuario.Rol);
+            int? estudianteId = await _repositorioAcademico
+                .ObtenerEstudianteIdPorUsuarioAsync(usuario.UsuarioId, cancellationToken)
+                .ConfigureAwait(false);
+            ResultadoEmisionTokenAcceso acceso = _generadorTokens.CrearTokenAcceso(
+                usuario.UsuarioId, usuario.NombreUsuario, usuario.Rol, estudianteId);
             string refreshPlano = _generadorTokens.CrearTokenRenovacion();
             string refreshHash = HashTokenRenovacion.AHexMinuscula(refreshPlano);
             DateTime expiraRefresh = _generadorTokens.CalcularExpiracionRenovacionUtc();

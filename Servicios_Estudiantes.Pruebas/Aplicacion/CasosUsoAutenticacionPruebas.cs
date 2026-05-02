@@ -20,7 +20,7 @@ public sealed class CasosUsoAutenticacionPruebas
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("x", It.IsAny<CancellationToken>()))
             .ReturnsAsync((UsuarioCredencialDto?)null);
 
-        IniciarSesionCommandHandler sut = new(repo.Object, new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
+        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("x", "pwd"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -34,7 +34,7 @@ public sealed class CasosUsoAutenticacionPruebas
         Mock<IRepositorioUsuarios> repo = new();
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("u", It.IsAny<CancellationToken>())).ReturnsAsync(usuario);
 
-        IniciarSesionCommandHandler sut = new(repo.Object, new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
+        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("u", "pwd"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -50,7 +50,7 @@ public sealed class CasosUsoAutenticacionPruebas
         Mock<IRepositorioUsuarios> repo = new();
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("u", It.IsAny<CancellationToken>())).ReturnsAsync(usuario);
 
-        IniciarSesionCommandHandler sut = new(repo.Object, hasher, Mock.Of<IGeneradorTokensJwt>());
+        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), hasher, Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("u", "otra"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -68,12 +68,12 @@ public sealed class CasosUsoAutenticacionPruebas
 
         Mock<IGeneradorTokensJwt> gen = new();
         DateTime expAcceso = DateTime.UtcNow.AddMinutes(30);
-        gen.Setup(g => g.CrearTokenAcceso(9, "luis", "Admin"))
+        gen.Setup(g => g.CrearTokenAcceso(9, "luis", "Admin", It.IsAny<int?>()))
             .Returns(new ResultadoEmisionTokenAcceso("access-token", "jid", expAcceso));
         gen.Setup(g => g.CrearTokenRenovacion()).Returns("refresh-plano");
         gen.Setup(g => g.CalcularExpiracionRenovacionUtc()).Returns(DateTime.UtcNow.AddDays(1));
 
-        IniciarSesionCommandHandler sut = new(repo.Object, hasher, gen.Object);
+        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), hasher, gen.Object);
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("luis", "Secret123!"), CancellationToken.None);
 
         Assert.True(resp.OperacionExitosa);
@@ -98,12 +98,12 @@ public sealed class CasosUsoAutenticacionPruebas
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("u", It.IsAny<CancellationToken>())).ReturnsAsync(usuario);
 
         Mock<IGeneradorTokensJwt> gen = new();
-        gen.Setup(g => g.CrearTokenAcceso(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
+        gen.Setup(g => g.CrearTokenAcceso(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>()))
             .Returns(new ResultadoEmisionTokenAcceso("t", "j", DateTime.UtcNow.AddMinutes(5)));
         gen.Setup(g => g.CrearTokenRenovacion()).Returns("r");
         gen.Setup(g => g.CalcularExpiracionRenovacionUtc()).Returns(DateTime.UtcNow.AddDays(1));
 
-        IniciarSesionCommandHandler sut = new(repo.Object, mockHasher.Object, gen.Object);
+        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), mockHasher.Object, gen.Object);
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("u", "Secret123!"), CancellationToken.None);
 
         Assert.True(resp.OperacionExitosa);
@@ -121,7 +121,7 @@ public sealed class CasosUsoAutenticacionPruebas
         repo.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hash, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
         repo.Setup(r => r.ObtenerUsuarioPorIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((UsuarioDetalleDto?)null);
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IGeneradorTokensJwt>());
+        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand(refresh), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -134,7 +134,7 @@ public sealed class CasosUsoAutenticacionPruebas
         repo.Setup(r => r.ObtenerRefreshValidoPorHashAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((RefreshTokenValidoDto?)null);
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IGeneradorTokensJwt>());
+        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand("cualquiera"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -152,7 +152,7 @@ public sealed class CasosUsoAutenticacionPruebas
         repo.Setup(r => r.ObtenerUsuarioPorIdAsync(5, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new UsuarioDetalleDto(5, "u", "e", "Rol", FechaBase, null, 0));
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IGeneradorTokensJwt>());
+        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand(refresh), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -171,12 +171,12 @@ public sealed class CasosUsoAutenticacionPruebas
             .ReturnsAsync(new UsuarioDetalleDto(2, "ana", "a@test.dev", "Estudiante", FechaBase, null, 1));
 
         Mock<IGeneradorTokensJwt> gen = new();
-        gen.Setup(g => g.CrearTokenAcceso(2, "ana", "Estudiante"))
+        gen.Setup(g => g.CrearTokenAcceso(2, "ana", "Estudiante", It.IsAny<int?>()))
             .Returns(new ResultadoEmisionTokenAcceso("acc", "jti", DateTime.UtcNow.AddMinutes(10)));
         gen.Setup(g => g.CrearTokenRenovacion()).Returns("refresh-nuevo");
         gen.Setup(g => g.CalcularExpiracionRenovacionUtc()).Returns(DateTime.UtcNow.AddDays(7));
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, gen.Object);
+        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), gen.Object);
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand(viejo), CancellationToken.None);
 
         Assert.True(resp.OperacionExitosa);

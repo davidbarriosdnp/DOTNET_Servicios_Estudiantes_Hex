@@ -117,3 +117,15 @@ GO
 
 CREATE NONCLUSTERED INDEX IX_Refresh_Usuario ON dbo.RefreshToken (UsuarioId) INCLUDE (ExpiresUtc, RevokedUtc);
 GO
+
+ALTER TABLE dbo.Estudiante ADD UsuarioId INT NULL;
+GO
+
+ALTER TABLE dbo.Estudiante
+    ADD CONSTRAINT FK_Estudiante_Usuario FOREIGN KEY (UsuarioId) REFERENCES dbo.Usuario (UsuarioId);
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX UX_Estudiante_UsuarioId
+    ON dbo.Estudiante (UsuarioId)
+    WHERE UsuarioId IS NOT NULL;
+GO

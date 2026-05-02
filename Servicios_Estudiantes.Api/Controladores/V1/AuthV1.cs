@@ -5,15 +5,26 @@ using Servicios_Estudiantes.Aplicacion.Envoltorios;
 namespace Servicios_Estudiantes.Api.Controladores.V1
 {
     /// <summary>
-    /// Rutas relacionadas con autenticaciÛn (v1).
+    /// Rutas relacionadas con autenticaciùn (v1).
     /// </summary>
     public static class AuthV1
     {
         /// <summary>
-        /// Mappea las rutas de autenticaciÛn al grupo proporcionado.
+        /// Mappea las rutas de autenticaciùn al grupo proporcionado.
         /// </summary>
         public static RouteGroupBuilder MapAuth(this RouteGroupBuilder group)
         {
+            group.MapPost("registro", async (IMediator mediator, CuerpoRegistroEstudiante cuerpo, CancellationToken cancellationToken) =>
+                    Results.Ok(await mediator.Send(
+                        new RegistroEstudianteEnLineaCommand(
+                            cuerpo.NombreUsuario,
+                            cuerpo.Email,
+                            cuerpo.Password,
+                            cuerpo.NombreCompleto,
+                            cuerpo.ProgramaCreditoId),
+                        cancellationToken)))
+                .AllowAnonymous();
+
             group.MapPost("login", async (IMediator mediator, CuerpoInicioSesion cuerpo, CancellationToken cancellationToken) =>
                 Results.Ok(await mediator.Send(new IniciarSesionCommand(cuerpo.NombreUsuario, cuerpo.Password), cancellationToken)));
 
@@ -32,17 +43,25 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
     }
 
     /// <summary>
-    /// Cuerpo de la peticiÛn de inicio de sesiÛn.
+    /// Cuerpo de la peticiùn de inicio de sesiùn.
     /// </summary>
     public sealed record CuerpoInicioSesion(string NombreUsuario, string Password);
 
     /// <summary>
-    /// Cuerpo de la peticiÛn para refrescar tokens.
+    /// Cuerpo de la peticiùn para refrescar tokens.
     /// </summary>
     public sealed record CuerpoRefrescar(string TokenRenovacion);
 
     /// <summary>
-    /// Cuerpo de la peticiÛn para cerrar sesiÛn. TokenRenovacion es opcional.
+    /// Cuerpo de la peticiùn para cerrar sesiùn. TokenRenovacion es opcional.
     /// </summary>
     public sealed record CuerpoCerrarSesion(string? TokenRenovacion);
+
+    /// <summary>Registro en lÌnea: credenciales, nombre del estudiante y programa de crÈditos.</summary>
+    public sealed record CuerpoRegistroEstudiante(
+        string NombreUsuario,
+        string Email,
+        string Password,
+        string NombreCompleto,
+        int ProgramaCreditoId);
 }

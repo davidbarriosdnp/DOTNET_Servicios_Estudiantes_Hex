@@ -15,10 +15,14 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
     /// <summary>
     /// Manejador para refrescar tokens.
     /// </summary>
-    public sealed class RefrescarTokenCommandHandler(IRepositorioUsuarios repositorio, IGeneradorTokensJwt generadorTokens)
+    public sealed class RefrescarTokenCommandHandler(
+        IRepositorioUsuarios repositorio,
+        IRepositorioAcademico repositorioAcademico,
+        IGeneradorTokensJwt generadorTokens)
         : IRequestHandler<RefrescarTokenCommand, Respuesta<TokenParDto>>
     {
         private readonly IRepositorioUsuarios _repositorio = repositorio;
+        private readonly IRepositorioAcademico _repositorioAcademico = repositorioAcademico;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
 
         /// <summary>
@@ -37,7 +41,11 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
 
             await _repositorio.RevocarRefreshPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
 
-            ResultadoEmisionTokenAcceso acceso = _generadorTokens.CrearTokenAcceso(usuario.UsuarioId, usuario.NombreUsuario, usuario.Rol);
+            int? estudianteId = await _repositorioAcademico
+                .ObtenerEstudianteIdPorUsuarioAsync(usuario.UsuarioId, cancellationToken)
+                .ConfigureAwait(false);
+            ResultadoEmisionTokenAcceso acceso = _generadorTokens.CrearTokenAcceso(
+                usuario.UsuarioId, usuario.NombreUsuario, usuario.Rol, estudianteId);
             string refreshPlano = _generadorTokens.CrearTokenRenovacion();
             string nuevoHash = HashTokenRenovacion.AHexMinuscula(refreshPlano);
             DateTime expiraRefresh = _generadorTokens.CalcularExpiracionRenovacionUtc();

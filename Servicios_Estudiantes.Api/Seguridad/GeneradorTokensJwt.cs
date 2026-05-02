@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using Servicios_Estudiantes.Api.Configuraciones;
+using Servicios_Estudiantes.Aplicacion.Constantes;
 using Servicios_Estudiantes.Aplicacion.Puertos;
 
 namespace Servicios_Estudiantes.Api.Seguridad
@@ -12,7 +13,7 @@ namespace Servicios_Estudiantes.Api.Seguridad
     {
         private readonly JwtOpciones _opciones = firma.Opciones;
 
-        public ResultadoEmisionTokenAcceso CrearTokenAcceso(int usuarioId, string nombreUsuario, string rol)
+        public ResultadoEmisionTokenAcceso CrearTokenAcceso(int usuarioId, string nombreUsuario, string rol, int? estudianteId = null)
         {
             string jti = Guid.NewGuid().ToString("N");
             DateTime expiraUtc = DateTime.UtcNow.AddMinutes(Math.Max(1, _opciones.MinutosValidezAcceso));
@@ -24,6 +25,8 @@ namespace Servicios_Estudiantes.Api.Seguridad
                 new Claim(ClaimTypes.Name, nombreUsuario),
                 new Claim(ClaimTypes.Role, rol)
             ];
+            if (estudianteId.HasValue)
+                reclamaciones.Add(new Claim(JwtReclamaciones.EstudianteId, estudianteId.Value.ToString(CultureInfo.InvariantCulture)));
 
             JwtSecurityToken token = new(
                 _opciones.Emisor,

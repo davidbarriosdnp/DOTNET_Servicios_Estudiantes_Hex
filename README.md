@@ -70,6 +70,8 @@ Para varias instancias de API, sustituya la lista negra en memoria por **Redis**
 
 ## Ejecución local
 
+Guía paso a paso (SQL Server + API + Angular, CORS, rutas del portal): **[docs/ENTORNO_LOCAL.md](docs/ENTORNO_LOCAL.md)**.
+
 ```bash
 dotnet restore Servicios_Estudiantes.sln
 dotnet run --project Servicios_Estudiantes.Api

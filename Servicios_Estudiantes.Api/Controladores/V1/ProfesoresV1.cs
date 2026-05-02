@@ -1,6 +1,7 @@
+using MediatR;
+using Servicios_Estudiantes.Api.Extensiones;
 using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
-using MediatR;
 
 namespace Servicios_Estudiantes.Api.Controladores.V1
 {
@@ -8,7 +9,7 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
     {
         public static RouteGroupBuilder MapProfesores(this RouteGroupBuilder group)
         {
-            group.RequireAuthorization();
+            group.RequireAuthorization(InyeccionDependenciasAutenticacion.PoliticaSoloAdministrador);
 
             group.MapGet("", async (IMediator m, bool soloActivos, CancellationToken ct) =>
                 Results.Ok(await m.Send(new ListarProfesoresQuery(soloActivos), ct)));

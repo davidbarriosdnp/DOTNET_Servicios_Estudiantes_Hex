@@ -219,7 +219,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         /// </summary>
         private static void LanzarSiNegocio(SqlException ex)
         {
-            if (ex.Number is >= 50_000 and <= 50_299)
+            if (ex.Number is >= 50_000 and <= 59_999)
                 throw new ExcepcionAplicacion(ex.Message, ex);
             if (ex.Number is 2601 or 2627)
                 throw new ExcepcionAplicacion("Violación de unicidad en base de datos (email o nombre de usuario duplicado).", ex);

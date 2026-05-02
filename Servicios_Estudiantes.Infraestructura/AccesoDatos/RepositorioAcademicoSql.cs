@@ -487,7 +487,8 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         /// </summary>
         private static void LanzarSiNegocio(SqlException ex)
         {
-            if (ex.Number is >= 50_000 and <= 50_299)
+            // THROW del SQL (p. ej. 501xx catálogo, 50300–50302 registro público) usa 50xxx–59xxx.
+            if (ex.Number is >= 50_000 and <= 59_999)
                 throw new ExcepcionAplicacion(ex.Message, ex);
             if (ex.Number is 2601 or 2627)
                 throw new ExcepcionAplicacion("Violación de unicidad en base de datos.", ex);

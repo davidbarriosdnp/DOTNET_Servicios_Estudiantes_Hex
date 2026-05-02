@@ -39,6 +39,30 @@ En Swagger UI use el botón **Authorize** y el esquema **Bearer**.
 
 ## Auth (`/api/v1/Auth`)
 
+### GET `.../Auth/programas` — público
+
+Lista programas de crédito **activos** (`ProgramaCreditoDto[]` en `resultado`), pensada para el formulario de registro en línea sin JWT.
+
+---
+
+### POST `.../Auth/registro` — público
+
+**Request body** (camelCase)
+
+```json
+{
+  "nombreUsuario": "estudiante1",
+  "email": "est@correo.com",
+  "password": "Minimo8chars",
+  "nombreCompleto": "Nombre Apellido",
+  "programaCreditoId": 1
+}
+```
+
+**Response `resultado`**: igual que login (`TokenParDto`). El JWT incluye el claim `estudiante_id` cuando el registro crea el perfil académico.
+
+---
+
 ### POST `.../Auth/login` — público
 
 **Request body**

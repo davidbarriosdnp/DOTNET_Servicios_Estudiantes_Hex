@@ -1,16 +1,18 @@
 using MediatR;
 using Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
+using Servicios_Estudiantes.Aplicacion.DTOs;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 
 namespace Servicios_Estudiantes.Api.Controladores.V1
 {
     /// <summary>
-    /// Rutas relacionadas con autenticacin (v1).
+    /// Rutas relacionadas con autenticaciï¿½n (v1).
     /// </summary>
     public static class AuthV1
     {
         /// <summary>
-        /// Mappea las rutas de autenticacin al grupo proporcionado.
+        /// Mappea las rutas de autenticaciï¿½n al grupo proporcionado.
         /// </summary>
         public static RouteGroupBuilder MapAuth(this RouteGroupBuilder group)
         {
@@ -23,6 +25,15 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
                             cuerpo.NombreCompleto,
                             cuerpo.ProgramaCreditoId),
                         cancellationToken)))
+                .AllowAnonymous();
+
+            /// <summary>Catï¿½logo pï¿½blico de programas activos (formulario de registro en lï¿½nea).</summary>
+            group.MapGet("programas", async (IMediator mediator, CancellationToken cancellationToken) =>
+                {
+                    Respuesta<IReadOnlyList<ProgramaCreditoDto>> resultado =
+                        await mediator.Send(new ListarProgramasCreditoQuery(SoloActivos: true), cancellationToken);
+                    return Results.Ok(resultado);
+                })
                 .AllowAnonymous();
 
             group.MapPost("login", async (IMediator mediator, CuerpoInicioSesion cuerpo, CancellationToken cancellationToken) =>
@@ -43,21 +54,21 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
     }
 
     /// <summary>
-    /// Cuerpo de la peticin de inicio de sesin.
+    /// Cuerpo de la peticiï¿½n de inicio de sesiï¿½n.
     /// </summary>
     public sealed record CuerpoInicioSesion(string NombreUsuario, string Password);
 
     /// <summary>
-    /// Cuerpo de la peticin para refrescar tokens.
+    /// Cuerpo de la peticiï¿½n para refrescar tokens.
     /// </summary>
     public sealed record CuerpoRefrescar(string TokenRenovacion);
 
     /// <summary>
-    /// Cuerpo de la peticin para cerrar sesin. TokenRenovacion es opcional.
+    /// Cuerpo de la peticiï¿½n para cerrar sesiï¿½n. TokenRenovacion es opcional.
     /// </summary>
     public sealed record CuerpoCerrarSesion(string? TokenRenovacion);
 
-    /// <summary>Registro en línea: credenciales, nombre del estudiante y programa de créditos.</summary>
+    /// <summary>Registro en lï¿½nea: credenciales, nombre del estudiante y programa de crï¿½ditos.</summary>
     public sealed record CuerpoRegistroEstudiante(
         string NombreUsuario,
         string Email,

@@ -24,7 +24,7 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
             });
 
             group.MapPut("{id:int}", async (IMediator m, int id, ActualizarMateriaCuerpo c, CancellationToken ct) =>
-                Results.Ok(await m.Send(new ActualizarMateriaCommand(id, c.Nombre, c.Creditos, c.ProfesorId, c.ProgramaCreditoId, c.Estado), ct)));
+                Results.Ok(await m.Send(new ActualizarMateriaCommand(id, c.Nombre, c.Creditos, c.ProfesorId, c.ProgramaCreditoId, c.AulaId, c.FechaInicio, c.FechaFin, c.HoraInicio, c.HoraFin, c.Estado), ct)));
 
             group.MapDelete("{id:int}", async (IMediator m, int id, CancellationToken ct) =>
                 Results.Ok(await m.Send(new EliminarMateriaCommand(id), ct)));
@@ -33,5 +33,5 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
         }
     }
 
-    public sealed record ActualizarMateriaCuerpo(string Nombre, byte Creditos, int ProfesorId, int ProgramaCreditoId, byte Estado);
+    public sealed record ActualizarMateriaCuerpo(string Nombre, byte Creditos, int ProfesorId, int ProgramaCreditoId, int? AulaId, DateOnly? FechaInicio, DateOnly? FechaFin, TimeOnly? HoraInicio, TimeOnly? HoraFin, byte Estado);
 }

@@ -18,12 +18,17 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public string Nombre { get; set; } = string.Empty;
 
         /// <summary>
-        /// Correo electrónico del estudiante.
+        /// Correo electrÃ³nico del estudiante.
         /// </summary>
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
-        /// Identificador del programa de crédito asociado.
+        /// Identificador del usuario asociado (opcional).
+        /// </summary>
+        public int? UsuarioId { get; set; }
+
+        /// <summary>
+        /// Identificador del programa de crÃ©dito asociado.
         /// </summary>
         public int ProgramaCreditoId { get; set; }
 
@@ -33,7 +38,7 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public DateTime FechaRegistro { get; set; }
 
         /// <summary>
-        /// Fecha de la última modificación del registro, si existe.
+        /// Fecha de la Ãºltima modificaciÃ³n del registro, si existe.
         /// </summary>
         public DateTime? FechaModificacion { get; set; }
 

@@ -34,8 +34,8 @@ public sealed class InyeccionDependenciaPruebas
     }
 
     [Fact]
-    public void RepositorioAcademicoSql_CadenaNull_Lanza()
+    public void RepositorioAcademicoEF_ContextNull_Lanza()
     {
-        Assert.Throws<ArgumentNullException>(() => new RepositorioAcademicoSql(null!));
+        Assert.Throws<ArgumentNullException>(() => new RepositorioAcademicoEF(null!));
     }
 }

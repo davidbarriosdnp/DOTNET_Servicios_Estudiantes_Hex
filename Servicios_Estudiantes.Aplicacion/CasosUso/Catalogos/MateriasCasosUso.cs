@@ -6,29 +6,29 @@ using Servicios_Estudiantes.Aplicacion.Puertos;
 
 namespace Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos
 {
-    public sealed record CrearMateriaCommand(string Nombre, byte Creditos, int ProfesorId, int ProgramaCreditoId) : IRequest<Respuesta<int>>;
+    public sealed record CrearMateriaCommand(string Nombre, byte Creditos, int ProfesorId, int ProgramaCreditoId, int? AulaId, DateOnly? FechaInicio, DateOnly? FechaFin, TimeOnly? HoraInicio, TimeOnly? HoraFin) : IRequest<Respuesta<int>>;
     public sealed class CrearMateriaHandler(IRepositorioAcademico repo) : IRequestHandler<CrearMateriaCommand, Respuesta<int>>
     {
         public async Task<Respuesta<int>> Handle(CrearMateriaCommand r, CancellationToken ct) =>
-            Respuesta<int>.Ok(await repo.InsertarMateriaAsync(r.Nombre, r.Creditos, r.ProfesorId, r.ProgramaCreditoId, ct).ConfigureAwait(false), "Materia creada.");
+            Respuesta<int>.Ok(await repo.InsertarMateriaAsync(r.Nombre, r.Creditos, r.ProfesorId, r.ProgramaCreditoId, r.AulaId, r.FechaInicio, r.FechaFin, r.HoraInicio, r.HoraFin, ct).ConfigureAwait(false), "Materia creada.");
     }
     public sealed class CrearMateriaValidator : AbstractValidator<CrearMateriaCommand>
     {
         public CrearMateriaValidator()
         {
             RuleFor(x => x.Nombre).NotEmpty().MaximumLength(120);
-            RuleFor(x => x.Creditos).Equal((byte)3).WithMessage("Cada materia debe valer exactamente 3 créditos.");
+            RuleFor(x => x.Creditos).Equal((byte)3).WithMessage("Cada materia debe valer exactamente 3 crǸditos.");
             RuleFor(x => x.ProfesorId).GreaterThan(0);
             RuleFor(x => x.ProgramaCreditoId).GreaterThan(0);
         }
     }
 
-    public sealed record ActualizarMateriaCommand(int MateriaId, string Nombre, byte Creditos, int ProfesorId, int ProgramaCreditoId, byte Estado) : IRequest<Respuesta<bool>>;
+    public sealed record ActualizarMateriaCommand(int MateriaId, string Nombre, byte Creditos, int ProfesorId, int ProgramaCreditoId, int? AulaId, DateOnly? FechaInicio, DateOnly? FechaFin, TimeOnly? HoraInicio, TimeOnly? HoraFin, byte Estado) : IRequest<Respuesta<bool>>;
     public sealed class ActualizarMateriaHandler(IRepositorioAcademico repo) : IRequestHandler<ActualizarMateriaCommand, Respuesta<bool>>
     {
         public async Task<Respuesta<bool>> Handle(ActualizarMateriaCommand r, CancellationToken ct)
         {
-            await repo.ActualizarMateriaAsync(r.MateriaId, r.Nombre, r.Creditos, r.ProfesorId, r.ProgramaCreditoId, r.Estado, ct).ConfigureAwait(false);
+            await repo.ActualizarMateriaAsync(r.MateriaId, r.Nombre, r.Creditos, r.ProfesorId, r.ProgramaCreditoId, r.AulaId, r.FechaInicio, r.FechaFin, r.HoraInicio, r.HoraFin, r.Estado, ct).ConfigureAwait(false);
             return Respuesta<bool>.Ok(true, "Materia actualizada.");
         }
     }

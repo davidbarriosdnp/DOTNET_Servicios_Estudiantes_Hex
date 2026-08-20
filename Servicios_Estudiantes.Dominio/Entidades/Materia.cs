@@ -1,3 +1,4 @@
+using System;
 using Servicios_Estudiantes.Dominio.Enumeraciones;
 
 namespace Servicios_Estudiantes.Dominio.Entidades
@@ -7,44 +8,39 @@ namespace Servicios_Estudiantes.Dominio.Entidades
     /// </summary>
     public sealed class Materia
     {
-        /// <summary>
-        /// Identificador de la materia.
-        /// </summary>
         public int MateriaId { get; set; }
-
-        /// <summary>
-        /// Nombre de la materia.
-        /// </summary>
         public string Nombre { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Créditos asociados a la materia.
-        /// </summary>
         public byte Creditos { get; set; }
-
-        /// <summary>
-        /// Identificador del profesor responsable de la materia.
-        /// </summary>
         public int ProfesorId { get; set; }
-
-        /// <summary>
-        /// Identificador del programa de crédito al que pertenece la materia.
-        /// </summary>
         public int ProgramaCreditoId { get; set; }
-
+        
         /// <summary>
-        /// Fecha de registro de la materia.
+        /// Aula asignada para la clase (opcional).
         /// </summary>
+        public int? AulaId { get; set; }
+        
+        /// <summary>
+        /// Fecha de inicio de las clases.
+        /// </summary>
+        public DateOnly? FechaInicio { get; set; }
+        
+        /// <summary>
+        /// Fecha de finalizaciÃ³n de las clases.
+        /// </summary>
+        public DateOnly? FechaFin { get; set; }
+        
+        /// <summary>
+        /// Hora de inicio de la clase.
+        /// </summary>
+        public TimeOnly? HoraInicio { get; set; }
+        
+        /// <summary>
+        /// Hora de finalizaciÃ³n de la clase.
+        /// </summary>
+        public TimeOnly? HoraFin { get; set; }
+
         public DateTime FechaRegistro { get; set; }
-
-        /// <summary>
-        /// Fecha de la última modificación del registro, si existe.
-        /// </summary>
         public DateTime? FechaModificacion { get; set; }
-
-        /// <summary>
-        /// Estado del registro (Activo/Inactivo).
-        /// </summary>
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
     }
 }

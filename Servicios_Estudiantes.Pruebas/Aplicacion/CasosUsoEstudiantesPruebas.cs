@@ -98,7 +98,7 @@ public sealed class CasosUsoEstudiantesPruebas
     [Fact]
     public async Task ListarInscripcionEstudiante_DevuelveOk()
     {
-        InscripcionEstudianteDto fila = new(3, "Mat", 3, 1, "Prof", FechaBase, null, 1);
+        InscripcionEstudianteDto fila = new(3, "Mat", 3, 1, "Prof", FechaBase, null, 1, null, "", "", null, null, null, null);
         Mock<IRepositorioAcademico> repo = new();
         repo.Setup(r => r.ListarInscripcionPorEstudianteAsync(10, true, It.IsAny<CancellationToken>())).ReturnsAsync([fila]);
 

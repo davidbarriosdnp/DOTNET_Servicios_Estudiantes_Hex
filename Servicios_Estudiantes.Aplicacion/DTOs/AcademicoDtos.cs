@@ -1,8 +1,7 @@
+using System;
+
 namespace Servicios_Estudiantes.Aplicacion.DTOs
 {
-    /// <summary>
-    /// DTO que representa un programa de crédito.
-    /// </summary>
     public sealed record ProgramaCreditoDto(
         int ProgramaCreditoId,
         string Nombre,
@@ -12,9 +11,6 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         DateTime? FechaModificacion,
         byte Estado);
 
-    /// <summary>
-    /// DTO que representa un profesor.
-    /// </summary>
     public sealed record ProfesorDto(
         int ProfesorId,
         string Nombre,
@@ -22,9 +18,24 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         DateTime? FechaModificacion,
         byte Estado);
 
-    /// <summary>
-    /// DTO con detalle completo de una materia.
-    /// </summary>
+    public sealed record SedeDto(
+        int SedeId,
+        string Nombre,
+        string Direccion,
+        DateTime FechaRegistro,
+        DateTime? FechaModificacion,
+        byte Estado);
+
+    public sealed record AulaDto(
+        int AulaId,
+        string Nombre,
+        int Capacidad,
+        int SedeId,
+        string NombreSede,
+        DateTime FechaRegistro,
+        DateTime? FechaModificacion,
+        byte Estado);
+
     public sealed record MateriaDetalleDto(
         int MateriaId,
         string Nombre,
@@ -34,11 +45,13 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         DateTime FechaRegistro,
         DateTime? FechaModificacion,
         byte Estado,
-        string NombreProfesor);
+        string NombreProfesor,
+        int? AulaId,
+        DateOnly? FechaInicio,
+        DateOnly? FechaFin,
+        TimeOnly? HoraInicio,
+        TimeOnly? HoraFin);
 
-    /// <summary>
-    /// DTO para mostrar una materia en catálogos/listados.
-    /// </summary>
     public sealed record MateriaCatalogoDto(
         int MateriaId,
         string Nombre,
@@ -48,11 +61,15 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         string NombreProfesor,
         DateTime FechaRegistro,
         DateTime? FechaModificacion,
-        byte Estado);
+        byte Estado,
+        int? AulaId,
+        string NombreAula,
+        string NombreSede,
+        DateOnly? FechaInicio,
+        DateOnly? FechaFin,
+        TimeOnly? HoraInicio,
+        TimeOnly? HoraFin);
 
-    /// <summary>
-    /// DTO con detalle de estudiante.
-    /// </summary>
     public sealed record EstudianteDetalleDto(
         int EstudianteId,
         string Nombre,
@@ -63,9 +80,6 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         byte Estado,
         int? UsuarioId);
 
-    /// <summary>
-    /// DTO usado en listados de estudiantes con materias inscritas.
-    /// </summary>
     public sealed record EstudianteRegistroDto(
         int EstudianteId,
         string Nombre,
@@ -76,9 +90,6 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         byte Estado,
         string MateriasInscritas);
 
-    /// <summary>
-    /// DTO que representa una inscripción de estudiante en una materia.
-    /// </summary>
     public sealed record InscripcionEstudianteDto(
         int MateriaId,
         string NombreMateria,
@@ -87,5 +98,12 @@ namespace Servicios_Estudiantes.Aplicacion.DTOs
         string NombreProfesor,
         DateTime FechaRegistro,
         DateTime? FechaModificacion,
-        byte Estado);
+        byte Estado,
+        int? AulaId,
+        string NombreAula,
+        string NombreSede,
+        DateOnly? FechaInicio,
+        DateOnly? FechaFin,
+        TimeOnly? HoraInicio,
+        TimeOnly? HoraFin);
 }

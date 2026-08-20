@@ -1,0 +1,29 @@
+name: .NET Core CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    - name: Configurar SDK de .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restaurar dependencias
+      run: dotnet restore Servicios_Estudiantes.sln
+
+    - name: Compilar la solución
+      run: dotnet build Servicios_Estudiantes.sln --no-restore --configuration Release
+
+    - name: Ejecutar pruebas unitarias
+      run: dotnet test Servicios_Estudiantes.sln --no-build --configuration Release --verbosity normal

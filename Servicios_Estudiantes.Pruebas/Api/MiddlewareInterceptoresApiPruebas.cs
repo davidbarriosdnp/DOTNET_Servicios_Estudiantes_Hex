@@ -57,7 +57,7 @@ public sealed class MiddlewareInterceptoresApiPruebas
         ManejadorErroresIntermediario sut = new(siguiente, NullLogger<ManejadorErroresIntermediario>.Instance);
         await sut.Invoke(ctx);
 
-        Assert.Equal(StatusCodes.Status400BadRequest, ctx.Response.StatusCode);
+        Assert.Equal(StatusCodes.Status422UnprocessableEntity, ctx.Response.StatusCode);
         string json = await LeerCuerpoRespuesta(ctx);
         Assert.Contains("mensaje", json);
     }

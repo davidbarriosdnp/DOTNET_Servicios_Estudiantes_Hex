@@ -156,7 +156,7 @@ namespace Servicios_Estudiantes.Api.Controladores.V1
 
     public sealed record ActualizarEstudianteCuerpo(string Nombre, string Email, int? ProgramaCreditoId, byte? Estado);
 
-    public sealed record InscripcionSolicitudApi(int MateriaId1, int MateriaId2, int MateriaId3);
+    public sealed record InscripcionSolicitudApi(int? MateriaId1, int? MateriaId2, int? MateriaId3);
 
     public sealed record InscripcionFilaCuerpo(int MateriaId);
 

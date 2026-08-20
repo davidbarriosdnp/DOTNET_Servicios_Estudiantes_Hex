@@ -1,11 +1,11 @@
-using Servicios_Estudiantes.Aplicacion.DTOs;
+ï»¿using Servicios_Estudiantes.Aplicacion.DTOs;
 
 namespace Servicios_Estudiantes.Aplicacion.Puertos
 {
     public interface IRepositorioAcademico
     {
         /// <summary>
-        /// Inserta un programa de crédito y devuelve su id.
+        /// Inserta un programa de crÃ©dito y devuelve su id.
         /// </summary>
         Task<int> InsertarProgramaCreditoAsync(string nombre, byte creditosPorMateria, byte maxMaterias, CancellationToken ct);
         Task ActualizarProgramaCreditoAsync(int id, string nombre, byte creditosPorMateria, byte maxMaterias, byte estado, CancellationToken ct);
@@ -36,7 +36,7 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
         /// </summary>
         Task<int> InsertarEstudianteAsync(string nombre, string email, int? programaCreditoId, int? usuarioId, CancellationToken ct);
 
-        /// <summary>Registro público: crea usuario (rol Estudiante) y estudiante en una transacción.</summary>
+        /// <summary>Registro pÃºblico: crea usuario (rol Estudiante) y estudiante en una transacciÃ³n.</summary>
         Task<(int UsuarioId, int EstudianteId)> RegistroPublicoEstudianteAsync(
             string nombreUsuario,
             string email,
@@ -53,16 +53,16 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
         Task<IReadOnlyList<EstudianteRegistroDto>> ListarRegistrosEstudiantesAsync(bool soloActivos, CancellationToken ct);
 
         /// <summary>
-        /// Registra la inscripción de un estudiante en tres materias.
+        /// Registra la inscripciÃ³n de un estudiante en tres materias.
         /// </summary>
-        Task RegistrarInscripcionAsync(int estudianteId, int m1, int m2, int m3, CancellationToken ct);
+        Task RegistrarInscripcionAsync(int estudianteId, int? m1, int? m2, int? m3, CancellationToken ct);
         Task InsertarInscripcionFilaAsync(int estudianteId, int materiaId, CancellationToken ct);
         Task EliminarInscripcionFilaAsync(int estudianteId, int materiaId, CancellationToken ct);
         Task ActualizarInscripcionMateriaAsync(int estudianteId, int materiaAnterior, int materiaNueva, CancellationToken ct);
         Task<IReadOnlyList<InscripcionEstudianteDto>> ListarInscripcionPorEstudianteAsync(int estudianteId, bool soloActivas, CancellationToken ct);
 
         /// <summary>
-        /// Lista los nombres de compañeros inscritos en una materia, excluyendo al solicitante.
+        /// Lista los nombres de compaÃ±eros inscritos en una materia, excluyendo al solicitante.
         /// </summary>
         Task<IReadOnlyList<string>> ListarNombresCompanerosPorMateriaAsync(int estudianteIdSolicitante, int materiaId, CancellationToken ct);
     }

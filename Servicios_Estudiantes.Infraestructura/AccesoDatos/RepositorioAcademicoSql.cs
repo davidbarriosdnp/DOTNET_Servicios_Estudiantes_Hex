@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Servicios_Estudiantes.Aplicacion.DTOs;
 using Servicios_Estudiantes.Aplicacion.Excepciones;
 using Servicios_Estudiantes.Aplicacion.Puertos;
@@ -7,8 +7,8 @@ using System.Data;
 namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
 {
     /// <summary>
-    /// Implementación SQL del repositorio académico.
-    /// Ejecuta procedimientos almacenados para operaciones CRUD relacionadas con el ámbito académico.
+    /// ImplementaciÃ³n SQL del repositorio acadÃ©mico.
+    /// Ejecuta procedimientos almacenados para operaciones CRUD relacionadas con el Ã¡mbito acadÃ©mico.
     /// </summary>
     public sealed class RepositorioAcademicoSql : IRepositorioAcademico
     {
@@ -17,12 +17,12 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         /// <summary>
         /// Crea una nueva instancia de <see cref="RepositorioAcademicoSql"/>.
         /// </summary>
-        /// <param name="cadenaConexion">Cadena de conexión a la base de datos.</param>
+        /// <param name="cadenaConexion">Cadena de conexiÃ³n a la base de datos.</param>
         public RepositorioAcademicoSql(string cadenaConexion) =>
             _cs = cadenaConexion ?? throw new ArgumentNullException(nameof(cadenaConexion));
 
         /// <summary>
-        /// Inserta un nuevo programa de crédito y devuelve su id.
+        /// Inserta un nuevo programa de crÃ©dito y devuelve su id.
         /// </summary>
         public async Task<int> InsertarProgramaCreditoAsync(string nombre, byte creditosPorMateria, byte maxMaterias, CancellationToken ct)
         {
@@ -35,7 +35,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Actualiza un programa de crédito existente.
+        /// Actualiza un programa de crÃ©dito existente.
         /// </summary>
         public async Task ActualizarProgramaCreditoAsync(int id, string nombre, byte creditosPorMateria, byte maxMaterias, byte estado, CancellationToken ct)
         {
@@ -48,7 +48,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Elimina (o marca como eliminado) un programa de crédito.
+        /// Elimina (o marca como eliminado) un programa de crÃ©dito.
         /// </summary>
         public async Task EliminarProgramaCreditoAsync(int id, CancellationToken ct)
         {
@@ -57,7 +57,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Obtiene un programa de crédito por su identificador.
+        /// Obtiene un programa de crÃ©dito por su identificador.
         /// </summary>
         public async Task<ProgramaCreditoDto?> ObtenerProgramaCreditoPorIdAsync(int id, CancellationToken ct)
         {
@@ -70,7 +70,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Lista los programas de crédito, opcionalmente sólo los activos.
+        /// Lista los programas de crÃ©dito, opcionalmente sÃ³lo los activos.
         /// </summary>
         public async Task<IReadOnlyList<ProgramaCreditoDto>> ListarProgramasCreditoAsync(bool soloActivos, CancellationToken ct)
         {
@@ -126,7 +126,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Lista los profesores, opcionalmente sólo los activos.
+        /// Lista los profesores, opcionalmente sÃ³lo los activos.
         /// </summary>
         public async Task<IReadOnlyList<ProfesorDto>> ListarProfesoresAsync(bool soloActivos, CancellationToken ct)
         {
@@ -308,7 +308,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Lista los registros de estudiantes, opcionalmente sólo los activos.
+        /// Lista los registros de estudiantes, opcionalmente sÃ³lo los activos.
         /// </summary>
         public async Task<IReadOnlyList<EstudianteRegistroDto>> ListarRegistrosEstudiantesAsync(bool soloActivos, CancellationToken ct)
         {
@@ -327,9 +327,9 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Registra la inscripción de un estudiante en tres materias.
+        /// Registra la inscripciÃ³n de un estudiante en tres materias.
         /// </summary>
-        public async Task RegistrarInscripcionAsync(int estudianteId, int m1, int m2, int m3, CancellationToken ct)
+        public async Task RegistrarInscripcionAsync(int estudianteId, int? m1, int? m2, int? m3, CancellationToken ct)
         {
             try
             {
@@ -340,7 +340,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Inserta una fila de inscripción (estudiante-materia).
+        /// Inserta una fila de inscripciÃ³n (estudiante-materia).
         /// </summary>
         public async Task InsertarInscripcionFilaAsync(int estudianteId, int materiaId, CancellationToken ct)
         {
@@ -349,7 +349,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Elimina una fila de inscripción (estudiante-materia).
+        /// Elimina una fila de inscripciÃ³n (estudiante-materia).
         /// </summary>
         public async Task EliminarInscripcionFilaAsync(int estudianteId, int materiaId, CancellationToken ct)
         {
@@ -391,7 +391,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Lista los nombres de compañeros inscritos en una materia, excluyendo al solicitante.
+        /// Lista los nombres de compaÃ±eros inscritos en una materia, excluyendo al solicitante.
         /// </summary>
         public async Task<IReadOnlyList<string>> ListarNombresCompanerosPorMateriaAsync(int estudianteIdSolicitante, int materiaId, CancellationToken ct)
         {
@@ -430,7 +430,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
                 r.GetString(8));
 
         /// <summary>
-        /// Convierte una fila leída en un <see cref="MateriaCatalogoDto"/>.
+        /// Convierte una fila leÃ­da en un <see cref="MateriaCatalogoDto"/>.
         /// </summary>
         private static MateriaCatalogoDto LeerMateriaCatalogoDto(SqlDataReader r)
         {
@@ -454,7 +454,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             new(r.GetInt32(0), r.GetString(1), r.GetByte(2), r.GetByte(3), r.GetDateTime(4), r.IsDBNull(5) ? null : r.GetDateTime(5), r.GetByte(6));
 
         /// <summary>
-        /// Ejecuta un procedimiento almacenado sin parámetros de salida.
+        /// Ejecuta un procedimiento almacenado sin parÃ¡metros de salida.
         /// </summary>
         private async Task EjecutarSinSalidaAsync(CancellationToken ct, string sp, params (string Name, object? Value)[] pars)
         {
@@ -467,7 +467,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Ejecuta un procedimiento almacenado y devuelve el valor de un parámetro de salida entero.
+        /// Ejecuta un procedimiento almacenado y devuelve el valor de un parÃ¡metro de salida entero.
         /// </summary>
         private async Task<int> EjecutarConSalidaIntAsync(CancellationToken ct, string sp, string parametroSalida, params (string Name, object? Value)[] pars)
         {
@@ -483,15 +483,15 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         }
 
         /// <summary>
-        /// Lanza una excepción de aplicación si el <see cref="SqlException"/> corresponde a reglas de negocio.
+        /// Lanza una excepciÃ³n de aplicaciÃ³n si el <see cref="SqlException"/> corresponde a reglas de negocio.
         /// </summary>
         private static void LanzarSiNegocio(SqlException ex)
         {
-            // THROW del SQL (p. ej. 501xx catálogo, 50300–50302 registro público) usa 50xxx–59xxx.
+            // THROW del SQL (p. ej. 501xx catÃ¡logo, 50300â€“50302 registro pÃºblico) usa 50xxxâ€“59xxx.
             if (ex.Number is >= 50_000 and <= 59_999)
                 throw new ExcepcionAplicacion(ex.Message, ex);
             if (ex.Number is 2601 or 2627)
-                throw new ExcepcionAplicacion("Violación de unicidad en base de datos.", ex);
+                throw new ExcepcionAplicacion("ViolaciÃ³n de unicidad en base de datos.", ex);
         }
     }
 }

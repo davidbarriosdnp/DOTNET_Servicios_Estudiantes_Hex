@@ -1,4 +1,4 @@
-﻿using Servicios_Estudiantes.Api.Excepciones;
+using Servicios_Estudiantes.Api.Excepciones;
 using Servicios_Estudiantes.Api.Utilidades;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 using Servicios_Estudiantes.Aplicacion.Excepciones;
@@ -43,22 +43,26 @@ namespace Servicios_Estudiantes.Api.Interceptores
                         break;
 
                     case ExcepcionValidacion e:
-                        respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
+                        respuesta.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
                         modeloRespuesta.Errores = e.Errores;
                         break;
 
                     case ExcepcionAplicacion e:
-                        respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
-                        modeloRespuesta.Mensaje = e.Message;
-                        break;
-
-                    case Excepcion e:
-                        respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
+                        // La excepción de negocio (como no cumplir con el máximo de materias o conflicto de profesor)
+                        // se asocia más con un estado 409 Conflict o 422 Unprocessable Entity en una API REST de nivel Master
+                        respuesta.StatusCode = e.Message.Contains("existen") || e.Message.Contains("encontrado")
+                            ? (int)HttpStatusCode.NotFound
+                            : (int)HttpStatusCode.Conflict;
                         modeloRespuesta.Mensaje = e.Message;
                         break;
 
                     case KeyNotFoundException e:
                         respuesta.StatusCode = (int)HttpStatusCode.NotFound;
+                        break;
+
+                    case Excepcion e:
+                        respuesta.StatusCode = (int)HttpStatusCode.BadRequest;
+                        modeloRespuesta.Mensaje = e.Message;
                         break;
 
                     default:

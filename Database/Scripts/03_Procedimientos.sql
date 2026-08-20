@@ -340,45 +340,102 @@ CREATE PROCEDURE dbo.sp_Estudiante_ListarRegistros
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT e.EstudianteId, e.Nombre, e.Email, e.ProgramaCreditoId, e.FechaRegistro, e.FechaModificacion, e.Estado,
+    -- GDPR: El email se enmascara en consultas generales públicas para evitar raspado de datos y mantener privacidad de estudiantes
+    SELECT e.EstudianteId, e.Nombre, Email = CONCAT(LEFT(e.Email, 3), '***@***.com'), e.ProgramaCreditoId, e.FechaRegistro, e.FechaModificacion, e.Estado,
         MateriasInscritas = ISNULL((
             SELECT STRING_AGG(CAST(m.Nombre AS NVARCHAR(MAX)), N', ')
-            FROM dbo.InscripcionEstudianteMateria i
-            INNER JOIN dbo.Materia m ON m.MateriaId = i.MateriaId AND m.Estado = 1
+            FROM dbo.InscripcionEstudianteMateria i WITH (NOLOCK)
+            INNER JOIN dbo.Materia m WITH (NOLOCK) ON m.MateriaId = i.MateriaId AND m.Estado = 1
             WHERE i.EstudianteId = e.EstudianteId AND i.Estado = 1
         ), N'')
-    FROM dbo.Estudiante e
+    FROM dbo.Estudiante e WITH (NOLOCK)
     WHERE @SoloActivos = 0 OR e.Estado = 1
     ORDER BY e.EstudianteId;
 END;
 GO
 
-/* --- Inscripción: reglas profesor único y máximo materias --- */
+/* --- Inscripción: reglas profesor único y máximo --- */
 CREATE PROCEDURE dbo.sp_Inscripcion_Registrar
     @EstudianteId INT,
-    @MateriaId1 INT,
-    @MateriaId2 INT,
-    @MateriaId3 INT
+    @MateriaId1 INT = NULL,
+    @MateriaId2 INT = NULL,
+    @MateriaId3 INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     DECLARE @ProgramaId INT, @MaxM TINYINT;
-    SELECT @ProgramaId = e.ProgramaCreditoId FROM dbo.Estudiante e WHERE e.EstudianteId = @EstudianteId AND e.Estado = 1;
-    IF @ProgramaId IS NULL THROW 50010, N'Estudiante no encontrado o inactivo.', 1;
-    SELECT @MaxM = MaxMateriasPorEstudiante FROM dbo.ProgramaCredito WHERE ProgramaCreditoId = @ProgramaId AND Estado = 1;
-    IF @MateriaId1 = @MateriaId2 OR @MateriaId1 = @MateriaId3 OR @MateriaId2 = @MateriaId3
-        THROW 50011, N'Debe seleccionar tres materias distintas.', 1;
-    IF (SELECT COUNT(*) FROM (VALUES (@MateriaId1), (@MateriaId2), (@MateriaId3)) t(Mid)
-        INNER JOIN dbo.Materia m ON m.MateriaId = t.Mid AND m.ProgramaCreditoId = @ProgramaId AND m.Estado = 1) <> 3
-        THROW 50012, N'Una o más materias no existen en el programa del estudiante.', 1;
-    IF EXISTS (SELECT ProfesorId FROM dbo.Materia WHERE MateriaId IN (@MateriaId1,@MateriaId2,@MateriaId3) GROUP BY ProfesorId HAVING COUNT(*) > 1)
-        THROW 50013, N'No puede inscribirse en más de una materia del mismo profesor.', 1;
+    
     BEGIN TRANSACTION;
+    
+    -- Bloquear el registro del estudiante para prevenir modificaciones simultáneas en transacciones paralelas
+    SELECT @ProgramaId = e.ProgramaCreditoId FROM dbo.Estudiante e WITH (UPDLOCK, HOLDLOCK) WHERE e.EstudianteId = @EstudianteId AND e.Estado = 1;
+    IF @ProgramaId IS NULL 
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50010, N'Estudiante no encontrado o inactivo.', 1;
+    END;
+
+    SELECT @MaxM = MaxMateriasPorEstudiante FROM dbo.ProgramaCredito WITH (UPDLOCK, HOLDLOCK) WHERE ProgramaCreditoId = @ProgramaId AND Estado = 1;
+    
+    -- Validar que al menos se haya seleccionado una materia
+    IF @MateriaId1 IS NULL AND @MateriaId2 IS NULL AND @MateriaId3 IS NULL
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50015, N'Debe seleccionar al menos una materia para inscribirse.', 1;
+    END;
+
+    -- Validar duplicados entre las materias no nulas seleccionadas
+    IF (@MateriaId1 IS NOT NULL AND @MateriaId2 IS NOT NULL AND @MateriaId1 = @MateriaId2) OR
+       (@MateriaId1 IS NOT NULL AND @MateriaId3 IS NOT NULL AND @MateriaId1 = @MateriaId3) OR
+       (@MateriaId2 IS NOT NULL AND @MateriaId3 IS NOT NULL AND @MateriaId2 = @MateriaId3)
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50011, N'Debe seleccionar materias distintas.', 1;
+    END;
+
+    -- Validar que existan las materias no nulas seleccionadas en el programa del estudiante
+    DECLARE @TotalSeleccionadas INT = 0;
+    SELECT @TotalSeleccionadas = COUNT(*) FROM (
+        SELECT Mid FROM (VALUES (@MateriaId1), (@MateriaId2), (@MateriaId3)) t(Mid) WHERE Mid IS NOT NULL
+    ) tmp;
+
+    IF (SELECT COUNT(*) FROM (
+            SELECT Mid FROM (VALUES (@MateriaId1), (@MateriaId2), (@MateriaId3)) t(Mid) WHERE Mid IS NOT NULL
+        ) t(Mid)
+        INNER JOIN dbo.Materia m WITH (UPDLOCK, HOLDLOCK) ON m.MateriaId = t.Mid AND m.ProgramaCreditoId = @ProgramaId AND m.Estado = 1) <> @TotalSeleccionadas
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50012, N'Una o más materias no existen en el programa del estudiante o están inactivas.', 1;
+    END;
+
+    -- Validar que no se comparta profesor
+    IF EXISTS (
+        SELECT ProfesorId 
+        FROM dbo.Materia WITH (UPDLOCK, HOLDLOCK) 
+        WHERE MateriaId IN (SELECT Mid FROM (VALUES (@MateriaId1), (@MateriaId2), (@MateriaId3)) t(Mid) WHERE Mid IS NOT NULL) 
+        GROUP BY ProfesorId 
+        HAVING COUNT(*) > 1
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50013, N'No puede inscribirse en más de una materia del mismo profesor.', 1;
+    END;
+
     DELETE FROM dbo.InscripcionEstudianteMateria WHERE EstudianteId = @EstudianteId;
-    INSERT INTO dbo.InscripcionEstudianteMateria (EstudianteId, MateriaId) VALUES (@EstudianteId,@MateriaId1),(@EstudianteId,@MateriaId2),(@EstudianteId,@MateriaId3);
-    IF (SELECT COUNT(*) FROM dbo.InscripcionEstudianteMateria WHERE EstudianteId=@EstudianteId AND Estado=1) <> @MaxM
-        THROW 50014, N'La inscripción no cumple la cantidad de materias permitidas.', 1;
+    
+    -- Insertar las materias no nulas
+    IF @MateriaId1 IS NOT NULL INSERT INTO dbo.InscripcionEstudianteMateria (EstudianteId, MateriaId) VALUES (@EstudianteId, @MateriaId1);
+    IF @MateriaId2 IS NOT NULL INSERT INTO dbo.InscripcionEstudianteMateria (EstudianteId, MateriaId) VALUES (@EstudianteId, @MateriaId2);
+    IF @MateriaId3 IS NOT NULL INSERT INTO dbo.InscripcionEstudianteMateria (EstudianteId, MateriaId) VALUES (@EstudianteId, @MateriaId3);
+
+    -- Comprobar que no se exceda el máximo
+    IF (SELECT COUNT(*) FROM dbo.InscripcionEstudianteMateria WITH (UPDLOCK, HOLDLOCK) WHERE EstudianteId=@EstudianteId AND Estado=1) > @MaxM
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50014, N'La inscripción excede la cantidad máxima de materias permitidas.', 1;
+    END;
+
     COMMIT TRANSACTION;
 END;
 GO
@@ -391,25 +448,53 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     DECLARE @ProgramaId INT, @MaxM TINYINT, @Cnt INT, @ProfNuevo INT;
-    SELECT @ProgramaId = e.ProgramaCreditoId FROM dbo.Estudiante e WHERE e.EstudianteId = @EstudianteId AND e.Estado = 1;
-    IF @ProgramaId IS NULL THROW 50200, N'Estudiante no encontrado o inactivo.', 1;
-    SELECT @MaxM = MaxMateriasPorEstudiante FROM dbo.ProgramaCredito WHERE ProgramaCreditoId = @ProgramaId AND Estado = 1;
-    SELECT @Cnt = COUNT(*) FROM dbo.InscripcionEstudianteMateria WHERE EstudianteId = @EstudianteId AND Estado = 1;
-    IF @Cnt >= @MaxM THROW 50201, N'Ya alcanzó el máximo de materias activas.', 1;
-    IF NOT EXISTS (SELECT 1 FROM dbo.Materia m WHERE m.MateriaId = @MateriaId AND m.ProgramaCreditoId = @ProgramaId AND m.Estado = 1)
+
+    BEGIN TRANSACTION;
+
+    SELECT @ProgramaId = e.ProgramaCreditoId FROM dbo.Estudiante e WITH (UPDLOCK, HOLDLOCK) WHERE e.EstudianteId = @EstudianteId AND e.Estado = 1;
+    IF @ProgramaId IS NULL
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50200, N'Estudiante no encontrado o inactivo.', 1;
+    END;
+
+    SELECT @MaxM = MaxMateriasPorEstudiante FROM dbo.ProgramaCredito WITH (UPDLOCK, HOLDLOCK) WHERE ProgramaCreditoId = @ProgramaId AND Estado = 1;
+    SELECT @Cnt = COUNT(*) FROM dbo.InscripcionEstudianteMateria WITH (UPDLOCK, HOLDLOCK) WHERE EstudianteId = @EstudianteId AND Estado = 1;
+    IF @Cnt >= @MaxM
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50201, N'Ya alcanzó el máximo de materias activas.', 1;
+    END;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.Materia m WITH (UPDLOCK, HOLDLOCK) WHERE m.MateriaId = @MateriaId AND m.ProgramaCreditoId = @ProgramaId AND m.Estado = 1)
+    BEGIN
+        ROLLBACK TRANSACTION;
         THROW 50202, N'Materia no válida para el programa.', 1;
-    SELECT @ProfNuevo = ProfesorId FROM dbo.Materia WHERE MateriaId = @MateriaId;
+    END;
+
+    SELECT @ProfNuevo = ProfesorId FROM dbo.Materia WITH (UPDLOCK, HOLDLOCK) WHERE MateriaId = @MateriaId;
     IF EXISTS (
-        SELECT 1 FROM dbo.InscripcionEstudianteMateria i
-        INNER JOIN dbo.Materia m ON m.MateriaId = i.MateriaId AND m.Estado = 1
+        SELECT 1 FROM dbo.InscripcionEstudianteMateria i WITH (UPDLOCK, HOLDLOCK)
+        INNER JOIN dbo.Materia m WITH (UPDLOCK, HOLDLOCK) ON m.MateriaId = i.MateriaId AND m.Estado = 1
         WHERE i.EstudianteId = @EstudianteId AND i.Estado = 1 AND m.ProfesorId = @ProfNuevo
-    ) THROW 50203, N'Ya tiene una materia activa con ese profesor.', 1;
-    IF EXISTS (SELECT 1 FROM dbo.InscripcionEstudianteMateria WHERE EstudianteId = @EstudianteId AND MateriaId = @MateriaId AND Estado = 1)
+    )
+    BEGIN
+        ROLLBACK TRANSACTION;
+        THROW 50203, N'Ya tiene una materia activa con ese profesor.', 1;
+    END;
+
+    IF EXISTS (SELECT 1 FROM dbo.InscripcionEstudianteMateria WITH (UPDLOCK, HOLDLOCK) WHERE EstudianteId = @EstudianteId AND MateriaId = @MateriaId AND Estado = 1)
+    BEGIN
+        ROLLBACK TRANSACTION;
         THROW 50204, N'Ya está inscrito en esa materia.', 1;
-    IF EXISTS (SELECT 1 FROM dbo.InscripcionEstudianteMateria WHERE EstudianteId = @EstudianteId AND MateriaId = @MateriaId)
+    END;
+
+    IF EXISTS (SELECT 1 FROM dbo.InscripcionEstudianteMateria WITH (UPDLOCK, HOLDLOCK) WHERE EstudianteId = @EstudianteId AND MateriaId = @MateriaId)
         UPDATE dbo.InscripcionEstudianteMateria SET Estado = 1, FechaModificacion = SYSUTCDATETIME() WHERE EstudianteId = @EstudianteId AND MateriaId = @MateriaId;
     ELSE
         INSERT INTO dbo.InscripcionEstudianteMateria (EstudianteId, MateriaId) VALUES (@EstudianteId, @MateriaId);
+
+    COMMIT TRANSACTION;
 END;
 GO
 

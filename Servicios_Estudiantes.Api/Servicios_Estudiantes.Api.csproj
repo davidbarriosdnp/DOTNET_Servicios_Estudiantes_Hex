@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ConfigDevOps\**" />
     <Compile Remove="DTOs\**" />
+    <Content Remove="ConfigDevOps\**" />
     <Content Remove="DTOs\**" />
+    <EmbeddedResource Remove="ConfigDevOps\**" />
     <EmbeddedResource Remove="DTOs\**" />
+    <None Remove="ConfigDevOps\**" />
     <None Remove="DTOs\**" />
   </ItemGroup>
 
@@ -28,10 +32,6 @@
     <ProjectReference Include="..\Servicios_Estudiantes.Aplicacion\Servicios_Estudiantes.Aplicacion.csproj" />
     <ProjectReference Include="..\Servicios_Estudiantes.Dominio\Servicios_Estudiantes.Dominio.csproj" />
     <ProjectReference Include="..\Servicios_Estudiantes.Infraestructura\Servicios_Estudiantes.Infraestructura.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ConfigDevOps\" />
   </ItemGroup>
 
   <ItemGroup>

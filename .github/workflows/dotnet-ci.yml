@@ -37,19 +37,20 @@ jobs:
     - name: Configurar Credenciales AWS via OIDC (Seguro)
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: `${{ secrets.AWS_ROLE_TO_ASSUME }}
-        aws-region: `${{ secrets.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ secrets.AWS_REGION }}
         audience: sts.amazonaws.com
     - name: Login en Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
     - name: Construir y Subir imagen Docker a ECR
       env:
-        ECR_REGISTRY: `${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_URI: `${{ secrets.AWS_ECR_REPOSITORY_URI }}
-        IMAGE_TAG: `${{ github.sha }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_URI: ${{ secrets.AWS_ECR_REPOSITORY_URI }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
-        REPO_NAME=\$(echo `$ECR_REPOSITORY_URI | cut -d'/' -f2)
-        docker build -t `$ECR_REGISTRY/`$REPO_NAME:`$IMAGE_TAG -t `$ECR_REGISTRY/`$REPO_NAME:latest .
-        docker push `$ECR_REGISTRY/`$REPO_NAME:`$IMAGE_TAG
-        docker push `$ECR_REGISTRY/`$REPO_NAME:latest
+        # Extraer nombre del repositorio de la URI completa
+        REPO_NAME=$(echo $ECR_REPOSITORY_URI | cut -d'/' -f2)
+        docker build -t $ECR_REGISTRY/$REPO_NAME:$IMAGE_TAG -t $ECR_REGISTRY/$REPO_NAME:latest .
+        docker push $ECR_REGISTRY/$REPO_NAME:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$REPO_NAME:latest

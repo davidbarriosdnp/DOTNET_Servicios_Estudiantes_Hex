@@ -1,5 +1,10 @@
 using Moq;
-using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.ProgramasCredito.Comandos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.ProgramasCredito.Consultas;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.Profesores.Comandos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.Profesores.Consultas;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.Materias.Comandos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.Materias.Consultas;
 using Servicios_Estudiantes.Aplicacion.DTOs;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 using Servicios_Estudiantes.Aplicacion.Puertos;

@@ -1,6 +1,6 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Servicios_Estudiantes.Aplicacion.Comportamientos;
-using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.ProgramasCredito.Comandos;
 using Servicios_Estudiantes.Aplicacion.CasosUso.Estudiantes.Comandos;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;

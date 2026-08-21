@@ -1,6 +1,7 @@
 using MediatR;
 using Servicios_Estudiantes.Api.Extensiones;
-using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.Profesores.Comandos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.Profesores.Consultas;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 
 namespace Servicios_Estudiantes.Api.Controladores.V1

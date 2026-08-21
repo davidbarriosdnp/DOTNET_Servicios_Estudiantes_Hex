@@ -1,6 +1,6 @@
 using MediatR;
 using Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion;
-using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos;
+using Servicios_Estudiantes.Aplicacion.CasosUso.Catalogos.ProgramasCredito.Consultas;
 using Servicios_Estudiantes.Aplicacion.DTOs;
 using Servicios_Estudiantes.Aplicacion.Envoltorios;
 

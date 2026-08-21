@@ -10,7 +10,7 @@ Env.Load();
 WebApplicationBuilder constructor = WebApplication.CreateBuilder(args);
 
 // Configurar AWS Systems Manager Parameter Store
-if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")))
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("INTEGRATION_TESTING")))
 {
     constructor.Configuration.AgregarAWSParameterStore();
 }

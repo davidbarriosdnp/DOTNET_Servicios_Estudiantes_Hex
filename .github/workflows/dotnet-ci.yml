@@ -34,6 +34,12 @@ jobs:
         AWS_ACCESS_KEY_ID: "DUMMYIDEXAMPLE"
         AWS_SECRET_ACCESS_KEY: "DUMMYEXAMPLEKEY"
         AWS_REGION: "us-east-1"
+        GITHUB_ACTIONS: "true"
+        OTEL_EXPORTER_OTLP_ENDPOINT_LOGS: "http://localhost:4317"
+        OTEL_EXPORTER_OTLP_ENDPOINT_TRACES: "http://localhost:4317"
+        OTEL_EXPORTER_OTLP_HEADERS: "Authorization=Bearer_Dummy"
+        NOMBRE_SERVICIO: "Servicios_Estudiantes_Test"
+        ORIGENES_CORS_PERMITIDOS: "http://localhost:4200"
       run: dotnet test Servicios_Estudiantes.sln --no-build --configuration Release --verbosity normal
 
   deploy-to-ecr:

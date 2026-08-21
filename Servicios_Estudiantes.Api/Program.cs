@@ -10,7 +10,10 @@ Env.Load();
 WebApplicationBuilder constructor = WebApplication.CreateBuilder(args);
 
 // Configurar AWS Systems Manager Parameter Store
-constructor.Configuration.AgregarAWSParameterStore();
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")))
+{
+    constructor.Configuration.AgregarAWSParameterStore();
+}
 
 ApiConfiguracion configuracion = constructor.Services.InstanciarConfiguracionApi(constructor.Configuration, constructor.Environment);
 constructor.Services.ConfigureDynatraceTrazas(configuracion);

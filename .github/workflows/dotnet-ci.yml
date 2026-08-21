@@ -40,6 +40,7 @@ jobs:
         OTEL_EXPORTER_OTLP_HEADERS: "Authorization=Bearer_Dummy"
         NOMBRE_SERVICIO: "Servicios_Estudiantes_Test"
         ORIGENES_CORS_PERMITIDOS: "http://localhost:4200"
+        AWS__DynamoDB__ServiceURL: "http://localhost:8000"
       run: dotnet test Servicios_Estudiantes.sln --no-build --configuration Release --verbosity normal
 
   deploy-to-ecr:

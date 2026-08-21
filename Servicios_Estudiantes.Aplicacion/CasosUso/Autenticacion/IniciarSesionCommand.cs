@@ -17,13 +17,15 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
     /// Manejador de la solicitud de inicio de sesión.
     /// </summary>
     public sealed class IniciarSesionCommandHandler(
-        IRepositorioUsuarios repositorio,
+        IRepositorioUsuarios repositorioUsuarios,
+        IRepositorioTokens repositorioTokens,
         IRepositorioAcademico repositorioAcademico,
         IPasswordHasher<string> passwordHasher,
         IGeneradorTokensJwt generadorTokens)
         : IRequestHandler<IniciarSesionCommand, Respuesta<TokenParDto>>
     {
-        private readonly IRepositorioUsuarios _repositorio = repositorio;
+        private readonly IRepositorioUsuarios _repositorioUsuarios = repositorioUsuarios;
+        private readonly IRepositorioTokens _repositorioTokens = repositorioTokens;
         private readonly IRepositorioAcademico _repositorioAcademico = repositorioAcademico;
         private readonly IPasswordHasher<string> _passwordHasher = passwordHasher;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
@@ -33,7 +35,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
         /// </summary>
         public async Task<Respuesta<TokenParDto>> Handle(IniciarSesionCommand solicitud, CancellationToken cancellationToken)
         {
-            UsuarioCredencialDto? usuario = await _repositorio
+            UsuarioCredencialDto? usuario = await _repositorioUsuarios
                 .ObtenerPorNombreUsuarioAsync(solicitud.NombreUsuario, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -47,7 +49,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
             if (verificacion == PasswordVerificationResult.SuccessRehashNeeded)
             {
                 string nuevoHash = _passwordHasher.HashPassword(string.Empty, solicitud.Password);
-                await _repositorio.ActualizarPasswordAsync(usuario.UsuarioId, nuevoHash, cancellationToken).ConfigureAwait(false);
+                await _repositorioUsuarios.ActualizarPasswordAsync(usuario.UsuarioId, nuevoHash, cancellationToken).ConfigureAwait(false);
             }
 
             int? estudianteId = await _repositorioAcademico
@@ -59,7 +61,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
             string refreshHash = HashTokenRenovacion.AHexMinuscula(refreshPlano);
             DateTime expiraRefresh = _generadorTokens.CalcularExpiracionRenovacionUtc();
 
-            await _repositorio.InsertarRefreshTokenAsync(usuario.UsuarioId, refreshHash, expiraRefresh, cancellationToken).ConfigureAwait(false);
+            await _repositorioTokens.InsertarRefreshTokenAsync(usuario.UsuarioId, refreshHash, expiraRefresh, cancellationToken).ConfigureAwait(false);
 
             int segundos = (int)Math.Max(1, (acceso.ExpiraUtc - DateTime.UtcNow).TotalSeconds);
             TokenParDto par = new(acceso.Token, refreshPlano, segundos);

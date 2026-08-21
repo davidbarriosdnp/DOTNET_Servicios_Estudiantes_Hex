@@ -17,14 +17,16 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
         int ProgramaCreditoId) : IRequest<Respuesta<TokenParDto>>;
 
     public sealed class RegistroEstudianteEnLineaCommandHandler(
-        IRepositorioAcademico repositorioAcademico,
         IRepositorioUsuarios repositorioUsuarios,
+        IRepositorioTokens repositorioTokens,
+        IRepositorioAcademico repositorioAcademico,
         IPasswordHasher<string> passwordHasher,
         IGeneradorTokensJwt generadorTokens)
         : IRequestHandler<RegistroEstudianteEnLineaCommand, Respuesta<TokenParDto>>
     {
-        private readonly IRepositorioAcademico _repositorioAcademico = repositorioAcademico;
         private readonly IRepositorioUsuarios _repositorioUsuarios = repositorioUsuarios;
+        private readonly IRepositorioTokens _repositorioTokens = repositorioTokens;
+        private readonly IRepositorioAcademico _repositorioAcademico = repositorioAcademico;
         private readonly IPasswordHasher<string> _passwordHasher = passwordHasher;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
 
@@ -41,16 +43,18 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
                     cancellationToken)
                 .ConfigureAwait(false);
 
+            // Generar tokens para login auto
             ResultadoEmisionTokenAcceso acceso = _generadorTokens.CrearTokenAcceso(
                 usuarioId, solicitud.NombreUsuario, "Estudiante", estudianteId);
+
             string refreshPlano = _generadorTokens.CrearTokenRenovacion();
             string refreshHash = HashTokenRenovacion.AHexMinuscula(refreshPlano);
             DateTime expiraRefresh = _generadorTokens.CalcularExpiracionRenovacionUtc();
-            await _repositorioUsuarios.InsertarRefreshTokenAsync(usuarioId, refreshHash, expiraRefresh, cancellationToken)
-                .ConfigureAwait(false);
+
+            await _repositorioTokens.InsertarRefreshTokenAsync(usuarioId, refreshHash, expiraRefresh, cancellationToken).ConfigureAwait(false);
 
             int segundos = (int)Math.Max(1, (acceso.ExpiraUtc - DateTime.UtcNow).TotalSeconds);
-            return Respuesta<TokenParDto>.Ok(new TokenParDto(acceso.Token, refreshPlano, segundos), "Registro completado. Sesión iniciada.");
+            return Respuesta<TokenParDto>.Ok(new TokenParDto(acceso.Token, refreshPlano, segundos), "Registro exitoso.");
         }
     }
 

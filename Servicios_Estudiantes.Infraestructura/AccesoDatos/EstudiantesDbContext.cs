@@ -16,7 +16,6 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         public DbSet<Materia> Materias { get; set; } = null!;
         public DbSet<ProgramaCredito> ProgramasCredito { get; set; } = null!;
         public DbSet<InscripcionEstudianteMateria> Inscripciones { get; set; } = null!;
-        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public DbSet<Sede> Sedes { get; set; } = null!;
         public DbSet<Aula> Aulas { get; set; } = null!;
 
@@ -31,7 +30,6 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             modelBuilder.Entity<Materia>().ToTable("Materia");
             modelBuilder.Entity<ProgramaCredito>().ToTable("ProgramaCredito");
             modelBuilder.Entity<InscripcionEstudianteMateria>().ToTable("InscripcionEstudianteMateria");
-            modelBuilder.Entity<RefreshToken>().ToTable("RefreshToken");
             modelBuilder.Entity<Sede>().ToTable("Sede");
             modelBuilder.Entity<Aula>().ToTable("Aula");
 
@@ -42,7 +40,6 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             modelBuilder.Entity<Materia>().HasKey(m => m.MateriaId);
             modelBuilder.Entity<ProgramaCredito>().HasKey(p => p.ProgramaCreditoId);
             modelBuilder.Entity<InscripcionEstudianteMateria>().HasKey(i => new { i.EstudianteId, i.MateriaId });
-            modelBuilder.Entity<RefreshToken>().HasKey(r => r.RefreshTokenId);
             modelBuilder.Entity<Sede>().HasKey(s => s.SedeId);
             modelBuilder.Entity<Aula>().HasKey(a => a.AulaId);
 

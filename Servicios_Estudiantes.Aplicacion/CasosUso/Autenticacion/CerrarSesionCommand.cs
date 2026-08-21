@@ -14,10 +14,10 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
     /// <summary>
     /// Manejador para cerrar sesión: revoca el access token por jti y el refresh si se proporciona.
     /// </summary>
-    public sealed class CerrarSesionCommandHandler(IRepositorioUsuarios repositorio, IJwtListaNegra listaNegra)
+    public sealed class CerrarSesionCommandHandler(IRepositorioTokens repositorioTokens, IJwtListaNegra listaNegra)
         : IRequestHandler<CerrarSesionCommand, Respuesta<bool>>
     {
-        private readonly IRepositorioUsuarios _repositorio = repositorio;
+        private readonly IRepositorioTokens _repositorioTokens = repositorioTokens;
         private readonly IJwtListaNegra _listaNegra = listaNegra;
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
             if (!string.IsNullOrWhiteSpace(solicitud.TokenRenovacionOpcional))
             {
                 string hash = HashTokenRenovacion.AHexMinuscula(solicitud.TokenRenovacionOpcional);
-                await _repositorio.RevocarRefreshPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
+                await _repositorioTokens.RevocarRefreshPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
             }
 
             return Respuesta<bool>.Ok(true, "Sesión cerrada.");

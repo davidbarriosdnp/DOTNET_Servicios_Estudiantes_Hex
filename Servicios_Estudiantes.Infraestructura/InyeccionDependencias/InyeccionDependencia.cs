@@ -25,6 +25,18 @@ namespace Servicios_Estudiantes.Infraestructura.InyeccionDependencias
             servicios.AddScoped<IRepositorioAcademico, RepositorioAcademicoEF>();
             servicios.AddScoped<IRepositorioUsuarios, RepositorioUsuariosEF>();
             
+            // AWS DynamoDB Setup
+            var awsOptions = configuracion.GetAWSOptions();
+            // Para AWS DynamoDB Local si no hay configuración real. 
+            // Si el ServiceURL está vacío usa las credenciales reales o variables de entorno.
+            if (configuracion["AWS:DynamoDB:ServiceURL"] != null)
+            {
+                awsOptions.DefaultClientConfig.ServiceURL = configuracion["AWS:DynamoDB:ServiceURL"];
+            }
+            servicios.AddDefaultAWSOptions(awsOptions);
+            servicios.AddAWSService<Amazon.DynamoDBv2.IAmazonDynamoDB>();
+            servicios.AddScoped<IRepositorioTokens, RepositorioTokensDynamoDB>();
+
             return servicios;
         }
     }

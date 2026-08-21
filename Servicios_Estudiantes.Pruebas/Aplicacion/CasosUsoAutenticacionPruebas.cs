@@ -20,7 +20,8 @@ public sealed class CasosUsoAutenticacionPruebas
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("x", It.IsAny<CancellationToken>()))
             .ReturnsAsync((UsuarioCredencialDto?)null);
 
-        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
+        Mock<IRepositorioTokens> tokens = new();
+        IniciarSesionCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("x", "pwd"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -34,7 +35,8 @@ public sealed class CasosUsoAutenticacionPruebas
         Mock<IRepositorioUsuarios> repo = new();
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("u", It.IsAny<CancellationToken>())).ReturnsAsync(usuario);
 
-        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
+        Mock<IRepositorioTokens> tokens = new();
+        IniciarSesionCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), new PasswordHasher<string>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("u", "pwd"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -50,7 +52,8 @@ public sealed class CasosUsoAutenticacionPruebas
         Mock<IRepositorioUsuarios> repo = new();
         repo.Setup(r => r.ObtenerPorNombreUsuarioAsync("u", It.IsAny<CancellationToken>())).ReturnsAsync(usuario);
 
-        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), hasher, Mock.Of<IGeneradorTokensJwt>());
+        Mock<IRepositorioTokens> tokens = new();
+        IniciarSesionCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), hasher, Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("u", "otra"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -73,7 +76,8 @@ public sealed class CasosUsoAutenticacionPruebas
         gen.Setup(g => g.CrearTokenRenovacion()).Returns("refresh-plano");
         gen.Setup(g => g.CalcularExpiracionRenovacionUtc()).Returns(DateTime.UtcNow.AddDays(1));
 
-        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), hasher, gen.Object);
+        Mock<IRepositorioTokens> tokens = new();
+        IniciarSesionCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), hasher, gen.Object);
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("luis", "Secret123!"), CancellationToken.None);
 
         Assert.True(resp.OperacionExitosa);
@@ -82,7 +86,7 @@ public sealed class CasosUsoAutenticacionPruebas
         Assert.Equal("refresh-plano", resp.Resultado.TokenRenovacion);
 
         string esperadoHash = HashTokenRenovacion.AHexMinuscula("refresh-plano");
-        repo.Verify(r => r.InsertarRefreshTokenAsync(9, esperadoHash, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(r => r.InsertarRefreshTokenAsync(9, esperadoHash, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -103,11 +107,13 @@ public sealed class CasosUsoAutenticacionPruebas
         gen.Setup(g => g.CrearTokenRenovacion()).Returns("r");
         gen.Setup(g => g.CalcularExpiracionRenovacionUtc()).Returns(DateTime.UtcNow.AddDays(1));
 
-        IniciarSesionCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), mockHasher.Object, gen.Object);
+        Mock<IRepositorioTokens> tokens = new();
+        IniciarSesionCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), mockHasher.Object, gen.Object);
         Respuesta<TokenParDto> resp = await sut.Handle(new IniciarSesionCommand("u", "Secret123!"), CancellationToken.None);
 
         Assert.True(resp.OperacionExitosa);
         repo.Verify(r => r.ActualizarPasswordAsync(3, "nuevo-hash", It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(t => t.InsertarRefreshTokenAsync(3, It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -118,10 +124,11 @@ public sealed class CasosUsoAutenticacionPruebas
         RefreshTokenValidoDto fila = new(1, 99, DateTime.UtcNow.AddHours(1));
 
         Mock<IRepositorioUsuarios> repo = new();
-        repo.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hash, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
+        Mock<IRepositorioTokens> tokens = new();
+        tokens.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hash, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
         repo.Setup(r => r.ObtenerUsuarioPorIdAsync(99, It.IsAny<CancellationToken>())).ReturnsAsync((UsuarioDetalleDto?)null);
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
+        RefrescarTokenCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand(refresh), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -131,10 +138,11 @@ public sealed class CasosUsoAutenticacionPruebas
     public async Task RefrescarToken_HashInvalido_DevuelveFallo()
     {
         Mock<IRepositorioUsuarios> repo = new();
-        repo.Setup(r => r.ObtenerRefreshValidoPorHashAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+        Mock<IRepositorioTokens> tokens = new();
+        tokens.Setup(r => r.ObtenerRefreshValidoPorHashAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((RefreshTokenValidoDto?)null);
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
+        RefrescarTokenCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand("cualquiera"), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -148,11 +156,12 @@ public sealed class CasosUsoAutenticacionPruebas
         RefreshTokenValidoDto fila = new(1, 5, DateTime.UtcNow.AddHours(1));
 
         Mock<IRepositorioUsuarios> repo = new();
-        repo.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hash, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
+        Mock<IRepositorioTokens> tokens = new();
+        tokens.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hash, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
         repo.Setup(r => r.ObtenerUsuarioPorIdAsync(5, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new UsuarioDetalleDto(5, "u", "e", "Rol", FechaBase, null, 0));
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
+        RefrescarTokenCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), Mock.Of<IGeneradorTokensJwt>());
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand(refresh), CancellationToken.None);
 
         Assert.False(resp.OperacionExitosa);
@@ -166,7 +175,8 @@ public sealed class CasosUsoAutenticacionPruebas
         RefreshTokenValidoDto fila = new(10, 2, DateTime.UtcNow.AddHours(2));
 
         Mock<IRepositorioUsuarios> repo = new();
-        repo.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hashViejo, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
+        Mock<IRepositorioTokens> tokens = new();
+        tokens.Setup(r => r.ObtenerRefreshValidoPorHashAsync(hashViejo, It.IsAny<CancellationToken>())).ReturnsAsync(fila);
         repo.Setup(r => r.ObtenerUsuarioPorIdAsync(2, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new UsuarioDetalleDto(2, "ana", "a@test.dev", "Estudiante", FechaBase, null, 1));
 
@@ -176,20 +186,20 @@ public sealed class CasosUsoAutenticacionPruebas
         gen.Setup(g => g.CrearTokenRenovacion()).Returns("refresh-nuevo");
         gen.Setup(g => g.CalcularExpiracionRenovacionUtc()).Returns(DateTime.UtcNow.AddDays(7));
 
-        RefrescarTokenCommandHandler sut = new(repo.Object, Mock.Of<IRepositorioAcademico>(), gen.Object);
+        RefrescarTokenCommandHandler sut = new(repo.Object, tokens.Object, Mock.Of<IRepositorioAcademico>(), gen.Object);
         Respuesta<TokenParDto> resp = await sut.Handle(new RefrescarTokenCommand(viejo), CancellationToken.None);
 
         Assert.True(resp.OperacionExitosa);
-        repo.Verify(r => r.RevocarRefreshPorHashAsync(hashViejo, It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(r => r.RevocarRefreshPorHashAsync(hashViejo, It.IsAny<CancellationToken>()), Times.Once);
         string hashNuevo = HashTokenRenovacion.AHexMinuscula("refresh-nuevo");
-        repo.Verify(r => r.InsertarRefreshTokenAsync(2, hashNuevo, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(r => r.InsertarRefreshTokenAsync(2, hashNuevo, It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task CerrarSesion_ConJwtValido_RegistraListaNegraYRevocaRefresh()
     {
         Mock<IJwtListaNegra> lista = new();
-        Mock<IRepositorioUsuarios> repo = new();
+        Mock<IRepositorioTokens> tokens = new();
 
         Servicios_Estudiantes.Api.Configuraciones.JwtOpciones opciones = new()
         {
@@ -205,33 +215,33 @@ public sealed class CasosUsoAutenticacionPruebas
         ResultadoEmisionTokenAcceso emitido = generadorReal.CrearTokenAcceso(1, "usuario", "Estudiante");
 
         string refresh = "mi-refresh";
-        CerrarSesionCommandHandler sut = new(repo.Object, lista.Object);
+        CerrarSesionCommandHandler sut = new(tokens.Object, lista.Object);
         await sut.Handle(new CerrarSesionCommand("Bearer " + emitido.Token, refresh), CancellationToken.None);
 
         JwtSecurityToken jwt = new JwtSecurityTokenHandler().ReadJwtToken(emitido.Token);
         string? jti = jwt.Claims.First(c => c.Type == JwtRegisteredClaimNames.Jti).Value;
 
         lista.Verify(l => l.RegistrarRevocacionAsync(jti, jwt.ValidTo, It.IsAny<CancellationToken>()), Times.Once);
-        repo.Verify(r => r.RevocarRefreshPorHashAsync(HashTokenRenovacion.AHexMinuscula(refresh), It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(r => r.RevocarRefreshPorHashAsync(HashTokenRenovacion.AHexMinuscula(refresh), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task CerrarSesion_JwtIlegible_AunRevocaRefresh()
     {
         Mock<IJwtListaNegra> lista = new();
-        Mock<IRepositorioUsuarios> repo = new();
-        CerrarSesionCommandHandler sut = new(repo.Object, lista.Object);
+        Mock<IRepositorioTokens> tokens = new();
+        CerrarSesionCommandHandler sut = new(tokens.Object, lista.Object);
 
         await sut.Handle(new CerrarSesionCommand("Bearer no-es-un-jwt", "otro"), CancellationToken.None);
 
         lista.Verify(l => l.RegistrarRevocacionAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()), Times.Never);
-        repo.Verify(r => r.RevocarRefreshPorHashAsync(HashTokenRenovacion.AHexMinuscula("otro"), It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(r => r.RevocarRefreshPorHashAsync(HashTokenRenovacion.AHexMinuscula("otro"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task CerrarSesion_SinDatos_CompletaOk()
     {
-        CerrarSesionCommandHandler sut = new(Mock.Of<IRepositorioUsuarios>(), Mock.Of<IJwtListaNegra>());
+        CerrarSesionCommandHandler sut = new(Mock.Of<IRepositorioTokens>(), Mock.Of<IJwtListaNegra>());
         Respuesta<bool> r = await sut.Handle(new CerrarSesionCommand(null, null), CancellationToken.None);
         Assert.True(r.OperacionExitosa);
     }

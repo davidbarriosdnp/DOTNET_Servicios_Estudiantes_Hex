@@ -75,11 +75,12 @@ public sealed class CasosUsoUsuariosPruebas
     public async Task EliminarUsuario_RevocaRefresh()
     {
         Mock<IRepositorioUsuarios> repo = new();
-        EliminarUsuarioCommandHandler sut = new(repo.Object);
+        Mock<IRepositorioTokens> tokens = new();
+        EliminarUsuarioCommandHandler sut = new(repo.Object, tokens.Object);
         await sut.Handle(new EliminarUsuarioCommand(7), CancellationToken.None);
 
         repo.Verify(r => r.EliminarUsuarioAsync(7, It.IsAny<CancellationToken>()), Times.Once);
-        repo.Verify(r => r.RevocarTodosRefreshUsuarioAsync(7, It.IsAny<CancellationToken>()), Times.Once);
+        tokens.Verify(r => r.RevocarTodosRefreshUsuarioAsync(7, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

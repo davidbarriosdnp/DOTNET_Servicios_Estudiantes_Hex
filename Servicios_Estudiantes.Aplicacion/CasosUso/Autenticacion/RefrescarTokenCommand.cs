@@ -16,12 +16,14 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
     /// Manejador para refrescar tokens.
     /// </summary>
     public sealed class RefrescarTokenCommandHandler(
-        IRepositorioUsuarios repositorio,
+        IRepositorioUsuarios repositorioUsuarios,
+        IRepositorioTokens repositorioTokens,
         IRepositorioAcademico repositorioAcademico,
         IGeneradorTokensJwt generadorTokens)
         : IRequestHandler<RefrescarTokenCommand, Respuesta<TokenParDto>>
     {
-        private readonly IRepositorioUsuarios _repositorio = repositorio;
+        private readonly IRepositorioUsuarios _repositorioUsuarios = repositorioUsuarios;
+        private readonly IRepositorioTokens _repositorioTokens = repositorioTokens;
         private readonly IRepositorioAcademico _repositorioAcademico = repositorioAcademico;
         private readonly IGeneradorTokensJwt _generadorTokens = generadorTokens;
 
@@ -31,15 +33,15 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
         public async Task<Respuesta<TokenParDto>> Handle(RefrescarTokenCommand solicitud, CancellationToken cancellationToken)
         {
             string hash = HashTokenRenovacion.AHexMinuscula(solicitud.TokenRenovacion);
-            RefreshTokenValidoDto? fila = await _repositorio.ObtenerRefreshValidoPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
+            RefreshTokenValidoDto? fila = await _repositorioTokens.ObtenerRefreshValidoPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
             if (fila is null)
                 return Respuesta<TokenParDto>.Fail("Token de renovación inválido o expirado.");
 
-            UsuarioDetalleDto? usuario = await _repositorio.ObtenerUsuarioPorIdAsync(fila.UsuarioId, cancellationToken).ConfigureAwait(false);
+            UsuarioDetalleDto? usuario = await _repositorioUsuarios.ObtenerUsuarioPorIdAsync(fila.UsuarioId, cancellationToken).ConfigureAwait(false);
             if (usuario is null || usuario.Estado != 1)
                 return Respuesta<TokenParDto>.Fail("Usuario no disponible.");
 
-            await _repositorio.RevocarRefreshPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
+            await _repositorioTokens.RevocarRefreshPorHashAsync(hash, cancellationToken).ConfigureAwait(false);
 
             int? estudianteId = await _repositorioAcademico
                 .ObtenerEstudianteIdPorUsuarioAsync(usuario.UsuarioId, cancellationToken)
@@ -49,7 +51,7 @@ namespace Servicios_Estudiantes.Aplicacion.CasosUso.Autenticacion
             string refreshPlano = _generadorTokens.CrearTokenRenovacion();
             string nuevoHash = HashTokenRenovacion.AHexMinuscula(refreshPlano);
             DateTime expiraRefresh = _generadorTokens.CalcularExpiracionRenovacionUtc();
-            await _repositorio.InsertarRefreshTokenAsync(usuario.UsuarioId, nuevoHash, expiraRefresh, cancellationToken).ConfigureAwait(false);
+            await _repositorioTokens.InsertarRefreshTokenAsync(usuario.UsuarioId, nuevoHash, expiraRefresh, cancellationToken).ConfigureAwait(false);
 
             int segundos = (int)Math.Max(1, (acceso.ExpiraUtc - DateTime.UtcNow).TotalSeconds);
             return Respuesta<TokenParDto>.Ok(new TokenParDto(acceso.Token, refreshPlano, segundos), "Token renovado.");

@@ -103,54 +103,5 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
                 await _context.SaveChangesAsync(ct);
             }
         }
-
-        public async Task<int> InsertarRefreshTokenAsync(int usuarioId, string tokenHash, DateTime expiresUtc, CancellationToken ct)
-        {
-            var entity = new RefreshToken
-            {
-                UsuarioId = usuarioId,
-                TokenHash = tokenHash,
-                ExpiresUtc = expiresUtc,
-                CreatedUtc = DateTime.UtcNow
-            };
-            _context.RefreshTokens.Add(entity);
-            await _context.SaveChangesAsync(ct);
-            return entity.RefreshTokenId;
-        }
-
-        public async Task<RefreshTokenValidoDto?> ObtenerRefreshValidoPorHashAsync(string tokenHash, CancellationToken ct)
-        {
-            var now = DateTime.UtcNow;
-            return await _context.RefreshTokens
-                .AsNoTracking()
-                .Where(r => r.TokenHash == tokenHash && r.RevokedUtc == null && r.ExpiresUtc > now)
-                .Select(r => new RefreshTokenValidoDto(r.RefreshTokenId, r.UsuarioId, r.ExpiresUtc))
-                .FirstOrDefaultAsync(ct);
-        }
-
-        public async Task RevocarRefreshPorHashAsync(string tokenHash, CancellationToken ct)
-        {
-            var token = await _context.RefreshTokens.Where(r => r.TokenHash == tokenHash).FirstOrDefaultAsync(ct);
-            if (token != null)
-            {
-                token.RevokedUtc = DateTime.UtcNow;
-                await _context.SaveChangesAsync(ct);
-            }
-        }
-
-        public async Task RevocarTodosRefreshUsuarioAsync(int usuarioId, CancellationToken ct)
-        {
-            var tokens = await _context.RefreshTokens
-                .Where(r => r.UsuarioId == usuarioId && r.RevokedUtc == null)
-                .ToListAsync(ct);
-                
-            var now = DateTime.UtcNow;
-            foreach (var t in tokens)
-            {
-                t.RevokedUtc = now;
-            }
-            if (tokens.Count > 0)
-                await _context.SaveChangesAsync(ct);
-        }
     }
 }

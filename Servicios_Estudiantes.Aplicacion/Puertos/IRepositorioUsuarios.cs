@@ -35,7 +35,7 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
         Task ActualizarUsuarioAsync(int usuarioId, string nombreUsuario, string email, string rol, byte estado, CancellationToken ct);
 
         /// <summary>
-        /// Actualiza la contraseña de un usuario.
+        /// Actualiza la contraseÃ±a de un usuario.
         /// </summary>
         Task ActualizarPasswordAsync(int usuarioId, string passwordHash, CancellationToken ct);
 
@@ -43,25 +43,5 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
         /// Elimina (o marca como eliminado) un usuario.
         /// </summary>
         Task EliminarUsuarioAsync(int usuarioId, CancellationToken ct);
-
-        /// <summary>
-        /// Inserta un refresh token y devuelve su id.
-        /// </summary>
-        Task<int> InsertarRefreshTokenAsync(int usuarioId, string tokenHash, DateTime expiresUtc, CancellationToken ct);
-
-        /// <summary>
-        /// Obtiene un refresh token válido por su hash.
-        /// </summary>
-        Task<RefreshTokenValidoDto?> ObtenerRefreshValidoPorHashAsync(string tokenHash, CancellationToken ct);
-
-        /// <summary>
-        /// Revoca un refresh token por su hash.
-        /// </summary>
-        Task RevocarRefreshPorHashAsync(string tokenHash, CancellationToken ct);
-
-        /// <summary>
-        /// Revoca todos los refresh tokens de un usuario.
-        /// </summary>
-        Task RevocarTodosRefreshUsuarioAsync(int usuarioId, CancellationToken ct);
     }
 }

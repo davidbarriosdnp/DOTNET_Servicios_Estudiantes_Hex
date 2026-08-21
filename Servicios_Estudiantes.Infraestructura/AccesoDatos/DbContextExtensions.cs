@@ -14,7 +14,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
                 new ProgramaCredito
                 {
                     ProgramaCreditoId = 1,
-                    Nombre = "Programa de créditos académicos",
+                    Nombre = "Ingeniería de software",
                     CreditosPorMateria = 3,
                     MaxMateriasPorEstudiante = 3,
                     FechaRegistro = now,

@@ -13,6 +13,11 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      dynamodb-local:
+        image: amazon/dynamodb-local
+        ports:
+          - "8000:8000"
     steps:
     - name: Checkout del codigo
       uses: actions/checkout@v4
@@ -25,6 +30,10 @@ jobs:
     - name: Compilar la solucion
       run: dotnet build Servicios_Estudiantes.sln --no-restore --configuration Release
     - name: Ejecutar pruebas unitarias
+      env:
+        AWS_ACCESS_KEY_ID: "DUMMYIDEXAMPLE"
+        AWS_SECRET_ACCESS_KEY: "DUMMYEXAMPLEKEY"
+        AWS_REGION: "us-east-1"
       run: dotnet test Servicios_Estudiantes.sln --no-build --configuration Release --verbosity normal
 
   deploy-to-ecr:

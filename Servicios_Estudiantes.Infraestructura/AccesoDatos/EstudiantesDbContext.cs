@@ -46,6 +46,63 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             // Configuracion de conversion de enums si fuera necesario
             // Por defecto, EF Core mapea enums a enteros, lo cual coincide con tu base de datos (tinyint)
 
+            // Relaciones de base de datos para el MER físico
+            
+            // Usuario (1) <-> (0..1) Estudiante
+            modelBuilder.Entity<Estudiante>()
+                .HasOne(e => e.Usuario)
+                .WithOne(u => u.Estudiante)
+                .HasForeignKey<Estudiante>(e => e.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ProgramaCredito (1) <-> (N) Estudiante
+            modelBuilder.Entity<Estudiante>()
+                .HasOne(e => e.ProgramaCredito)
+                .WithMany(p => p.Estudiantes)
+                .HasForeignKey(e => e.ProgramaCreditoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Sede (1) <-> (N) Aula
+            modelBuilder.Entity<Aula>()
+                .HasOne(a => a.Sede)
+                .WithMany(s => s.Aulas)
+                .HasForeignKey(a => a.SedeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Profesor (1) <-> (N) Materia
+            modelBuilder.Entity<Materia>()
+                .HasOne(m => m.Profesor)
+                .WithMany(p => p.Materias)
+                .HasForeignKey(m => m.ProfesorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ProgramaCredito (1) <-> (N) Materia
+            modelBuilder.Entity<Materia>()
+                .HasOne(m => m.ProgramaCredito)
+                .WithMany(p => p.Materias)
+                .HasForeignKey(m => m.ProgramaCreditoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Aula (1) <-> (N) Materia (Opcional)
+            modelBuilder.Entity<Materia>()
+                .HasOne(m => m.Aula)
+                .WithMany(a => a.Materias)
+                .HasForeignKey(m => m.AulaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Relación de muchos a muchos (InscripcionEstudianteMateria)
+            modelBuilder.Entity<InscripcionEstudianteMateria>()
+                .HasOne(i => i.Estudiante)
+                .WithMany(e => e.Inscripciones)
+                .HasForeignKey(i => i.EstudianteId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<InscripcionEstudianteMateria>()
+                .HasOne(i => i.Materia)
+                .WithMany(m => m.Inscripciones)
+                .HasForeignKey(i => i.MateriaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Datos Semilla (HasData) para inicializacion
             modelBuilder.SeedData();
         }

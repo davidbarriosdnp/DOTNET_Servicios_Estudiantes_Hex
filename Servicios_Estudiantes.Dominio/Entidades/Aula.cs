@@ -14,5 +14,9 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public DateTime FechaRegistro { get; set; }
         public DateTime? FechaModificacion { get; set; }
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
+
+        // Propiedades de Navegación
+        public Sede Sede { get; set; } = null!;
+        public ICollection<Materia> Materias { get; set; } = new List<Materia>();
     }
 }

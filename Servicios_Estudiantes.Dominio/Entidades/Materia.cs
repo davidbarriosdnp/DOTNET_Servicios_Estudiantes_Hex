@@ -42,5 +42,11 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public DateTime FechaRegistro { get; set; }
         public DateTime? FechaModificacion { get; set; }
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
+
+        // Propiedades de Navegación
+        public Profesor Profesor { get; set; } = null!;
+        public ProgramaCredito ProgramaCredito { get; set; } = null!;
+        public Aula? Aula { get; set; }
+        public ICollection<InscripcionEstudianteMateria> Inscripciones { get; set; } = new List<InscripcionEstudianteMateria>();
     }
 }

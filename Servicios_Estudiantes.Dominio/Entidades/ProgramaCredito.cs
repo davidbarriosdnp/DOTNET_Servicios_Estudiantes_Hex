@@ -3,38 +3,38 @@ using Servicios_Estudiantes.Dominio.Enumeraciones;
 namespace Servicios_Estudiantes.Dominio.Entidades
 {
     /// <summary>
-    /// Representa un programa académico basado en créditos.
-    /// Contiene información sobre créditos por materia y restricciones de carga.
+    /// Representa un programa acadÃ©mico basado en crÃ©ditos.
+    /// Contiene informaciÃ³n sobre crÃ©ditos por materia y restricciones de carga.
     /// </summary>
     public sealed class ProgramaCredito
     {
         /// <summary>
-        /// Identificador del programa de crédito.
+        /// Identificador del programa de crÃ©dito.
         /// </summary>
         public int ProgramaCreditoId { get; set; }
 
         /// <summary>
-        /// Nombre del programa de crédito.
+        /// Nombre del programa de crÃ©dito.
         /// </summary>
         public string Nombre { get; set; } = string.Empty;
 
         /// <summary>
-        /// Créditos asignados por cada materia en el programa.
+        /// CrÃ©ditos asignados por cada materia en el programa.
         /// </summary>
         public byte CreditosPorMateria { get; set; }
 
         /// <summary>
-        /// Número máximo de materias que un estudiante puede matricular en el programa.
+        /// NÃºmero mÃ¡ximo de materias que un estudiante puede matricular en el programa.
         /// </summary>
         public byte MaxMateriasPorEstudiante { get; set; }
 
         /// <summary>
-        /// Fecha en que se registró el programa.
+        /// Fecha en que se registrÃ³ el programa.
         /// </summary>
         public DateTime FechaRegistro { get; set; }
 
         /// <summary>
-        /// Fecha de la última modificación del programa, si existe.
+        /// Fecha de la Ãºltima modificaciÃ³n del programa, si existe.
         /// </summary>
         public DateTime? FechaModificacion { get; set; }
 
@@ -42,5 +42,9 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         /// Estado del registro (Activo/Inactivo).
         /// </summary>
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
+
+        // Propiedades de NavegaciÃ³n
+        public ICollection<Estudiante> Estudiantes { get; set; } = new List<Estudiante>();
+        public ICollection<Materia> Materias { get; set; } = new List<Materia>();
     }
 }

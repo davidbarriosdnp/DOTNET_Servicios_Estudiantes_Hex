@@ -1,8 +1,8 @@
 namespace Servicios_Estudiantes.Dominio.Entidades
 {
     /// <summary>
-    /// Usuario del sistema (autenticación y autorización).
-    /// La persistencia se gestiona vía procedimientos almacenados en infraestructura.
+    /// Usuario del sistema (autenticacin y autorizacin).
+    /// La persistencia se gestiona va procedimientos almacenados en infraestructura.
     /// </summary>
     public sealed class Usuario
     {
@@ -12,17 +12,17 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public int UsuarioId { get; set; }
 
         /// <summary>
-        /// Nombre de usuario para autenticación.
+        /// Nombre de usuario para autenticacin.
         /// </summary>
         public string NombreUsuario { get; set; } = string.Empty;
 
         /// <summary>
-        /// Correo electrónico del usuario.
+        /// Correo electrnico del usuario.
         /// </summary>
         public string Email { get; set; } = string.Empty;
 
         /// <summary>
-        /// Hash de la contraseña.
+        /// Hash de la contrasea.
         /// </summary>
         public string PasswordHash { get; set; } = string.Empty;
 
@@ -37,7 +37,7 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public DateTime FechaRegistro { get; set; }
 
         /// <summary>
-        /// Fecha de última modificación.
+        /// Fecha de ǧltima modificacin.
         /// </summary>
         public DateTime? FechaModificacion { get; set; }
 
@@ -45,5 +45,8 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         /// Estado del usuario (1 activo, 0 inactivo).
         /// </summary>
         public byte Estado { get; set; } = 1;
+
+        // Propiedades de Navegación
+        public Estudiante? Estudiante { get; set; }
     }
 }

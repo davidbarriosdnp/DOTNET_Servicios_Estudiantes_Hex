@@ -18,12 +18,12 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public string Nombre { get; set; } = string.Empty;
 
         /// <summary>
-        /// Fecha en que se registró el profesor.
+        /// Fecha en que se registrÃ³ el profesor.
         /// </summary>
         public DateTime FechaRegistro { get; set; }
 
         /// <summary>
-        /// Fecha de la última modificación del registro, si existe.
+        /// Fecha de la Ãºltima modificaciÃ³n del registro, si existe.
         /// </summary>
         public DateTime? FechaModificacion { get; set; }
 
@@ -31,5 +31,8 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         /// Estado del registro (Activo/Inactivo).
         /// </summary>
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
+
+        // Propiedades de NavegaciÃ³n
+        public ICollection<Materia> Materias { get; set; } = new List<Materia>();
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Servicios_Estudiantes.Infraestructura.AccesoDatos;
 
@@ -11,9 +12,11 @@ using Servicios_Estudiantes.Infraestructura.AccesoDatos;
 namespace Servicios_Estudiantes.Infraestructura.Migrations
 {
     [DbContext(typeof(EstudiantesDbContext))]
-    partial class EstudiantesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260821171012_AgregarRelacionesFisicas")]
+    partial class AgregarRelacionesFisicas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

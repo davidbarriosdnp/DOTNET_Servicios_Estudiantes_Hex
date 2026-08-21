@@ -3,7 +3,7 @@ using Servicios_Estudiantes.Dominio.Enumeraciones;
 namespace Servicios_Estudiantes.Dominio.Entidades
 {
     /// <summary>
-    /// Representa la inscripción de un estudiante en una materia.
+    /// Representa la inscripciÃ³n de un estudiante en una materia.
     /// </summary>
     public sealed class InscripcionEstudianteMateria
     {
@@ -18,12 +18,12 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         public int MateriaId { get; set; }
 
         /// <summary>
-        /// Fecha en que se registró la inscripción.
+        /// Fecha en que se registrÃ³ la inscripciÃ³n.
         /// </summary>
         public DateTime FechaRegistro { get; set; }
 
         /// <summary>
-        /// Fecha de la última modificación, si existe.
+        /// Fecha de la Ãºltima modificaciÃ³n, si existe.
         /// </summary>
         public DateTime? FechaModificacion { get; set; }
 
@@ -31,5 +31,9 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         /// Estado del registro (Activo/Inactivo).
         /// </summary>
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
+
+        // Propiedades de NavegaciÃ³n
+        public Estudiante Estudiante { get; set; } = null!;
+        public Materia Materia { get; set; } = null!;
     }
 }

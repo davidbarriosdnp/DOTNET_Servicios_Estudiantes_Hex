@@ -46,5 +46,10 @@ namespace Servicios_Estudiantes.Dominio.Entidades
         /// Estado del registro (Activo/Inactivo).
         /// </summary>
         public EstadoRegistro Estado { get; set; } = EstadoRegistro.Activo;
+
+        // Propiedades de Navegación
+        public Usuario? Usuario { get; set; }
+        public ProgramaCredito ProgramaCredito { get; set; } = null!;
+        public ICollection<InscripcionEstudianteMateria> Inscripciones { get; set; } = new List<InscripcionEstudianteMateria>();
     }
 }

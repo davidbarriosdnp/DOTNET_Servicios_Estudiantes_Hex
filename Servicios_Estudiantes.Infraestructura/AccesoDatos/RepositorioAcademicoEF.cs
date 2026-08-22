@@ -21,20 +21,107 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IReadOnlyList<SedeDto>> ListarSedesAsync(CancellationToken ct)
+        public async Task<int> InsertarSedeAsync(string nombre, string direccion, CancellationToken ct)
+        {
+            var entity = new Sede { Nombre = nombre, Direccion = direccion, FechaRegistro = DateTime.UtcNow, Estado = EstadoRegistro.Activo };
+            _context.Sedes.Add(entity);
+            await SaveChangesAsync(ct);
+            return entity.SedeId;
+        }
+
+        public async Task ActualizarSedeAsync(int id, string nombre, string direccion, byte estado, CancellationToken ct)
+        {
+            var entity = await _context.Sedes.FindAsync([id], ct);
+            if (entity != null)
+            {
+                entity.Nombre = nombre;
+                entity.Direccion = direccion;
+                entity.Estado = (EstadoRegistro)estado;
+                entity.FechaModificacion = DateTime.UtcNow;
+                await SaveChangesAsync(ct);
+            }
+        }
+
+        public async Task EliminarSedeAsync(int id, CancellationToken ct)
+        {
+            var entity = await _context.Sedes.FindAsync([id], ct);
+            if (entity != null)
+            {
+                entity.Estado = EstadoRegistro.Inactivo;
+                entity.FechaModificacion = DateTime.UtcNow;
+                await SaveChangesAsync(ct);
+            }
+        }
+
+        public async Task<SedeDto?> ObtenerSedePorIdAsync(int id, CancellationToken ct)
         {
             return await _context.Sedes.AsNoTracking()
-                .Where(s => s.Estado == EstadoRegistro.Activo)
+                .Where(s => s.SedeId == id && s.Estado == EstadoRegistro.Activo)
+                .Select(s => new SedeDto(s.SedeId, s.Nombre, s.Direccion, s.FechaRegistro, s.FechaModificacion, (byte)s.Estado))
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<SedeDto>> ListarSedesAsync(bool soloActivos, CancellationToken ct)
+        {
+            var query = _context.Sedes.AsNoTracking();
+            if (soloActivos) query = query.Where(s => s.Estado == EstadoRegistro.Activo);
+
+            return await query
                 .Select(s => new SedeDto(s.SedeId, s.Nombre, s.Direccion, s.FechaRegistro, s.FechaModificacion, (byte)s.Estado))
                 .ToListAsync(ct);
         }
 
-        public async Task<IReadOnlyList<AulaDto>> ListarAulasAsync(CancellationToken ct)
+        public async Task<int> InsertarAulaAsync(string nombre, int capacidad, int sedeId, CancellationToken ct)
+        {
+            var entity = new Aula { Nombre = nombre, Capacidad = capacidad, SedeId = sedeId, FechaRegistro = DateTime.UtcNow, Estado = EstadoRegistro.Activo };
+            _context.Aulas.Add(entity);
+            await SaveChangesAsync(ct);
+            return entity.AulaId;
+        }
+
+        public async Task ActualizarAulaAsync(int id, string nombre, int capacidad, int sedeId, byte estado, CancellationToken ct)
+        {
+            var entity = await _context.Aulas.FindAsync([id], ct);
+            if (entity != null)
+            {
+                entity.Nombre = nombre;
+                entity.Capacidad = capacidad;
+                entity.SedeId = sedeId;
+                entity.Estado = (EstadoRegistro)estado;
+                entity.FechaModificacion = DateTime.UtcNow;
+                await SaveChangesAsync(ct);
+            }
+        }
+
+        public async Task EliminarAulaAsync(int id, CancellationToken ct)
+        {
+            var entity = await _context.Aulas.FindAsync([id], ct);
+            if (entity != null)
+            {
+                entity.Estado = EstadoRegistro.Inactivo;
+                entity.FechaModificacion = DateTime.UtcNow;
+                await SaveChangesAsync(ct);
+            }
+        }
+
+        public async Task<AulaDto?> ObtenerAulaPorIdAsync(int id, CancellationToken ct)
         {
             var query = from a in _context.Aulas.AsNoTracking()
                         join s in _context.Sedes.AsNoTracking() on a.SedeId equals s.SedeId
-                        where a.Estado == EstadoRegistro.Activo && s.Estado == EstadoRegistro.Activo
+                        where a.AulaId == id && a.Estado == EstadoRegistro.Activo && s.Estado == EstadoRegistro.Activo
                         select new { a, s };
+
+            return await query.Select(x => new AulaDto(x.a.AulaId, x.a.Nombre, x.a.Capacidad, x.a.SedeId, x.s.Nombre, x.a.FechaRegistro, x.a.FechaModificacion, (byte)x.a.Estado))
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<AulaDto>> ListarAulasAsync(bool soloActivos, CancellationToken ct)
+        {
+            var query = from a in _context.Aulas.AsNoTracking()
+                        join s in _context.Sedes.AsNoTracking() on a.SedeId equals s.SedeId
+                        select new { a, s };
+                        
+            if (soloActivos) query = query.Where(x => x.a.Estado == EstadoRegistro.Activo && x.s.Estado == EstadoRegistro.Activo);
 
             return await query.Select(x => new AulaDto(x.a.AulaId, x.a.Nombre, x.a.Capacidad, x.a.SedeId, x.s.Nombre, x.a.FechaRegistro, x.a.FechaModificacion, (byte)x.a.Estado))
                 .ToListAsync(ct);

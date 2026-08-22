@@ -8,8 +8,17 @@ namespace Servicios_Estudiantes.Aplicacion.Puertos
 {
     public interface IRepositorioAcademico
     {
-        Task<IReadOnlyList<SedeDto>> ListarSedesAsync(CancellationToken ct);
-        Task<IReadOnlyList<AulaDto>> ListarAulasAsync(CancellationToken ct);
+        Task<int> InsertarSedeAsync(string nombre, string direccion, CancellationToken ct);
+        Task ActualizarSedeAsync(int id, string nombre, string direccion, byte estado, CancellationToken ct);
+        Task EliminarSedeAsync(int id, CancellationToken ct);
+        Task<SedeDto?> ObtenerSedePorIdAsync(int id, CancellationToken ct);
+        Task<IReadOnlyList<SedeDto>> ListarSedesAsync(bool soloActivos, CancellationToken ct);
+
+        Task<int> InsertarAulaAsync(string nombre, int capacidad, int sedeId, CancellationToken ct);
+        Task ActualizarAulaAsync(int id, string nombre, int capacidad, int sedeId, byte estado, CancellationToken ct);
+        Task EliminarAulaAsync(int id, CancellationToken ct);
+        Task<AulaDto?> ObtenerAulaPorIdAsync(int id, CancellationToken ct);
+        Task<IReadOnlyList<AulaDto>> ListarAulasAsync(bool soloActivos, CancellationToken ct);
 
         Task<int> InsertarProgramaCreditoAsync(string nombre, byte creditosPorMateria, byte maxMaterias, CancellationToken ct);
         Task ActualizarProgramaCreditoAsync(int id, string nombre, byte creditosPorMateria, byte maxMaterias, byte estado, CancellationToken ct);

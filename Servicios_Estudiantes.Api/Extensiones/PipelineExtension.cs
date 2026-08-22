@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Servicios_Estudiantes.Api.Extensiones
@@ -42,6 +42,8 @@ namespace Servicios_Estudiantes.Api.Extensiones
             apiGroup.MapearTodasLasVersionesControlador("ProgramasCredito");
             apiGroup.MapearTodasLasVersionesControlador("Profesores");
             apiGroup.MapearTodasLasVersionesControlador("Materias");
+            apiGroup.MapearTodasLasVersionesControlador("Sedes");
+            apiGroup.MapearTodasLasVersionesControlador("Aulas");
             return app;
         }
 

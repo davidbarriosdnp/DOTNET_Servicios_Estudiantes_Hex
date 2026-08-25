@@ -38,7 +38,7 @@ namespace Servicios_Estudiantes.Infraestructura.AccesoDatos
         {
             return await _context.Usuarios
                 .AsNoTracking()
-                .Where(u => u.NombreUsuario == nombreUsuario && u.Estado == (byte)EstadoRegistro.Activo)
+                .Where(u => (u.NombreUsuario == nombreUsuario || u.Email == nombreUsuario) && u.Estado == (byte)EstadoRegistro.Activo)
                 .Select(u => new UsuarioCredencialDto(u.UsuarioId, u.NombreUsuario, u.Email, u.PasswordHash, u.Rol, u.FechaRegistro, u.FechaModificacion, u.Estado))
                 .FirstOrDefaultAsync(ct);
         }

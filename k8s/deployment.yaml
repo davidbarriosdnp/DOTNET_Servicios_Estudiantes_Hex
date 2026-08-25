@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-estudiantes
+  labels:
+    app: api-estudiantes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-estudiantes
+  template:
+    metadata:
+      labels:
+        app: api-estudiantes
+    spec:
+      serviceAccountName: api-estudiantes-sa
+      containers:
+      - name: backend
+        # Reemplaza 'latest' por el tag específico si es necesario.
+        # Esta URI viene de tu repositorio ECR 'servicios-estudiantes-backend'
+        image: 933832340783.dkr.ecr.us-east-1.amazonaws.com/servicios-estudiantes-backend:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
